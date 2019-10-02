@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/artem/compC++/Scanner.cpp
+Scanner.h
+/home/artem/compC++/Scanner.h
+
+/home/artem/compC++/Scanner.h
+defs.h
+/home/artem/compC++/defs.h
+
+/home/artem/compC++/defs.h
+iostream
+-
+string.h
+-
+
