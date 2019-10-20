@@ -1,53 +1,36 @@
 #include "Scanner.h"
-//
-// Created by artem on 02.10.2019.
-//
+/**
+Программа: главная программа языка С++. Допускается описание функций без параметров, функции возвращают значение.
+Типы данных: int ( в том числе  short , long, long long) .
+Операции: арифметические, сравнения.
+Операторы: присваивания и for простейшей формы .
+Операнды:  простые переменные и константы.
+Константы: целые в 10   c/c  и 16   c/c .
+*/
 
 TypeLex keyWord[MAX_NUM_KEY_WORD] = {"for","int","long","short","return"};
 int indexKeyWord[MAX_NUM_KEY_WORD] = {TFor,TInt,TLong,TShort,TReturn};
 
-TScanner::TScanner(const char *fileName){
+Scanner::Scanner(const char *fileName){
     getData(fileName);
     uk = 0;
     pos = 0;
     line = 1;
 };
 
-bool TScanner::isLetter(char ch) {
+bool Scanner::isLetter(char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == '_');
 }
 
-bool TScanner::isDigit10(char ch) {
+bool Scanner::isDigit10(char ch) {
     return ch >= '0' && ch <= '9';
 }
 
-bool TScanner::isDigit16(char ch) {
-    return TScanner::isDigit10(ch) || ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'));
+bool Scanner::isDigit16(char ch) {
+    return Scanner::isDigit10(ch) || ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'));
 }
 
-void TScanner::setUK(int i) {
-    uk = i;
-}
-
-int TScanner::getUK() {
-    return uk;
-}
-
-int TScanner::getPos() {
-    return pos;
-}
-
-void TScanner::setPos(int _pos) {
-    pos = _pos;
-}
-int TScanner::getLine() {
-    return line;
-}
-
-void TScanner::setLine(int _line) {
-    line = _line;
-}
-void TScanner::getData(const char * FileName) {
+void Scanner::getData(const char * FileName) {
 // ввод файла FileName, который содержит текст исходного модуля
     char aa;
     FILE * in = fopen(FileName,"r");
@@ -70,17 +53,17 @@ void TScanner::getData(const char * FileName) {
     fclose(in);
 }
 
-void TScanner::printError(const string& error) {
+void Scanner::printError(const string& error) {
     cout << "Ошибка! " <<  error << "\n";
     exit(1);
 }
 
-void TScanner::printError(const string& error, TypeLex lex) {
-    cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " )\n";
+void Scanner::printError(string error, TypeLex lex) {
+    cerr << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " )\n";
     exit(1);
 }
 
-void TScanner::printWarning(int typeError) {
+void Scanner::printWarning(int typeError) {
     printf("Предупреждение! Строка %d, позиция %d. ", line, pos);
     switch (typeError) {
         case WLongId :
@@ -90,10 +73,9 @@ void TScanner::printWarning(int typeError) {
             printf("Неизвестная ошибка %d\n",typeError);
             break;
     }
-    exit(1);
 }
 
-void TScanner::printError(int typeError) {
+void Scanner::printError(int typeError) {
     printf("Ошибка! Строка %d, позиция %d. ", line, pos);
     switch (typeError) {
         case EWrongChar :
@@ -115,7 +97,7 @@ void TScanner::printError(int typeError) {
     exit(1);
 }
 
-int TScanner::scanner(TypeLex lex)  {
+int Scanner::scanner(TypeLex lex)  {
     memset(lex, '\0', MAX_LEX);
     int i = 0;
     //Пропускаем игнорируемые символы
@@ -130,11 +112,13 @@ int TScanner::scanner(TypeLex lex)  {
         }
         //Пропускаем игнорируемые символы(комментарий однострочный)
         if ((t[uk] == '/') &&  (t[uk + 1] == '/')) {
-                uk += 2;
-                while (t[uk] != '\n' && t[uk] != '\0')
-                    uk++;
-        } else
+            uk += 2;
+            while (t[uk] != '\n' && t[uk] != '\0')
+                uk++;
+
+        } else{
             break;
+        }
     }
 
     if(t[uk] == '\0')
@@ -144,12 +128,14 @@ int TScanner::scanner(TypeLex lex)  {
         lex[i++] = t[uk++];
         pos++;
         while(isLetter(t[uk]) || isDigit10(t[uk])){
-            lex[i++] = t[uk++];
-            pos++;
-            if(i == MAX_LEX){
-                printWarning(ELongIntConst);
-                break;
+            if(i < MAX_LEX-1){
+                lex[i++] = t[uk];
             }
+            else if (i == MAX_LEX - 1){
+                i++;
+                printWarning(WLongId);
+            }
+            uk++;pos++;
         }
         for (int j = 0; j < MAX_NUM_KEY_WORD; j++) {
             if (strcmp(lex, keyWord[j]) == 0)
@@ -318,7 +304,34 @@ int TScanner::scanner(TypeLex lex)  {
     return TErr;
 }
 
-void TScanner::newLine() {
+void Scanner::newLine() {
     line++;
     pos = 0;
+}
+
+void Scanner::setUK(int i) {
+    uk = i;
+    line = tmpLine;
+    pos = tmpPos;
+}
+
+int Scanner::getUK() {
+    tmpLine = line;
+    tmpPos = pos;
+    return uk;
+}
+
+int Scanner::getPos() {
+    return pos;
+}
+
+void Scanner::setPos(int _pos) {
+    pos = _pos;
+}
+int Scanner::getLine() {
+    return line;
+}
+
+void Scanner::setLine(int _line) {
+    line = _line;
 }

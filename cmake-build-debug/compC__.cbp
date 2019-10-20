@@ -84,6 +84,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/artem/compC++/Diagram.cpp">
+			<Option target="compC__"/>
+		</Unit>
+		<Unit filename="/home/artem/compC++/Diagram.h">
+			<Option target="compC__"/>
+		</Unit>
 		<Unit filename="/home/artem/compC++/Scanner.cpp">
 			<Option target="compC__"/>
 		</Unit>

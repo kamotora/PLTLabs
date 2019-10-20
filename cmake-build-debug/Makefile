@@ -123,6 +123,33 @@ compC__/fast:
 	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/build
 .PHONY : compC__/fast
 
+Diagram.o: Diagram.cpp.o
+
+.PHONY : Diagram.o
+
+# target to build an object file
+Diagram.cpp.o:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Diagram.cpp.o
+.PHONY : Diagram.cpp.o
+
+Diagram.i: Diagram.cpp.i
+
+.PHONY : Diagram.i
+
+# target to preprocess a source file
+Diagram.cpp.i:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Diagram.cpp.i
+.PHONY : Diagram.cpp.i
+
+Diagram.s: Diagram.cpp.s
+
+.PHONY : Diagram.s
+
+# target to generate assembly for a file
+Diagram.cpp.s:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Diagram.cpp.s
+.PHONY : Diagram.cpp.s
+
 Scanner.o: Scanner.cpp.o
 
 .PHONY : Scanner.o
@@ -186,6 +213,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... compC__"
 	@echo "... edit_cache"
+	@echo "... Diagram.o"
+	@echo "... Diagram.i"
+	@echo "... Diagram.s"
 	@echo "... Scanner.o"
 	@echo "... Scanner.i"
 	@echo "... Scanner.s"

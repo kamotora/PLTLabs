@@ -12,13 +12,19 @@ int cc = a - fun();
 
 int main() {
     a = fun();
-    (a--)--;
+    k = (a--)--;
     d = test();
-    short int9 = 0X0FAAAA;
+    char = 8;
+    short int9 = 0X0FAA;
+    long ___q99999293193113wertyuiossdfghjkqwertyuAACV__ssdfghjk___q99999293193113wertyuiossdfghjkqwertyuAACV__ssdfghjk = 12390;
     long l = -1324;
-    for(long long i = 0; i < 0xFF; i++){
+    for(i = 0; i < 0xFF; i++){
         a = (3 + ((b + i) * 2) % 0xF) * int9 / l;
     }
     return a;
-    (
 }
+int d;
+
+string errorFunc(int a1,char a2, double a3){
+    char a[] = "OQWEQ002___`;//"}
+    //

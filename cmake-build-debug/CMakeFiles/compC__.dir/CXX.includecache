@@ -17,6 +17,6 @@ defs.h
 /home/artem/compC++/defs.h
 iostream
 -
-string.h
+cstring
 -
 

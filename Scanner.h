@@ -8,23 +8,23 @@
 #include "defs.h"
 using namespace std;
 
-class TScanner{
+class Scanner{
 private:
     //сканируемый модуль
     TypeMod t;
     int uk;
     int pos,line;
+    int tmpPos, tmpLine;
     static bool isDigit10(char ch);
     static bool isLetter(char ch);
     static bool isDigit16(char ch);
 public:
     void newLine();
     int getUK();
-    void printError (const string& error, char *);
     int scanner(TypeLex typeLex);
     void getData(const char *);
-    TScanner(const char *);
-    ~TScanner(){};
+    Scanner(const char *);
+    ~Scanner() = default;
 
     void printError(int typeError);
 
@@ -41,5 +41,7 @@ public:
     int getLine();
 
     void printError(const string &error);
+
+    void printError(string error, char *lex);
 };
 #endif //COMPC___SCANNER_H

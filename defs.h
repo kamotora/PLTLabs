@@ -6,7 +6,7 @@
 #define COMPC___DEFS_H
 
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 // Максимальная длина исходного модуля
 #define MAX_TEXT 10000
@@ -80,4 +80,6 @@ typedef char TypeMod[MAX_TEXT];
 typedef char TypeLex[MAX_LEX];
 
 
+//Красный цвет для вывода в консоль
+#define KRED  "\x1B[31m"
 #endif //COMPC___DEFS_H
