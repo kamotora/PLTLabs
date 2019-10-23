@@ -64,83 +64,76 @@ void Diagram::description() {
 
 void Diagram::data() {
     type();
-    list();
-    TypeLex lex; int t;
-    t = sc -> scanner(lex);
+    TypeLex lex;
+    int t, tmpUk;
+    do {
+        tmpUk = sc->getUK();
+        int tmpPos = sc->getPos();
+        int tmpLine = sc->getLine();
+        t = sc->scanner(lex);
+        if (t != TIdent)
+            sc->printError("Ожидался идентификатор", lex);
+        int tmpUk2 = sc->getUK();
+        t = sc->scanner(lex);
+
+        //Если после идентификатора равно - это присваивание
+        if (t == TSave) {
+            sc->setUK(tmpUk);
+            sc->setLine(tmpLine);
+            sc->setPos(tmpPos);
+            assign();
+        } else
+            sc->setUK(tmpUk2);
+        //tmpUk = sc -> getUK();
+        t = sc->scanner(lex);
+    } while (t == TZpt);
+    //sc->setUK(tmpUk);
+    //t = sc -> scanner(lex);
     if(t != TTZpt)
         sc->printError("Ожидался символ ;", lex);
 }
 
+
 void Diagram::type() {
-    TypeLex l; int t;
-    int uk1 = sc -> getUK();
+    TypeLex l;
+    int t, tmpUk;
     t = sc -> scanner(l);
     if(t != TLong && t != TInt && t != TShort)
         sc -> printError("Ожидался тип данных (long, short или int");
     if(t == TInt)
+        //int
         return;
     if(t == TShort){
-
+        //найден short
+        //не выходим, т.к. можем найти int
     }
     if(t == TLong){
-        int uk2 = sc -> getUK();
+        tmpUk = sc->getUK();
         t = sc -> scanner(l);
         if(t == TLong){
             //long long
         } else
-            sc -> setUK(uk2);
+            sc->setUK(tmpUk);
     }
-    uk1 = sc-> getUK();
+    tmpUk = sc->getUK();
     t = sc -> scanner(l);
     if(t == TInt){
+        //short int,long int,long long int
         return;
     } else
-        sc -> setUK(uk1);
+        //short,long,long long
+        sc->setUK(tmpUk);
 
-}
-
-void Diagram::list() {
-    TypeLex lex;
-    int t,tmpUk;
-    do{
-        var();
-        tmpUk = sc -> getUK();
-        t = sc->scanner(lex);
-    }while(t == TZpt);
-    sc->setUK(tmpUk);
-}
-
-void Diagram::var() {
-    TypeLex lex;
-    int t,tmpUk;
-    tmpUk = sc -> getUK();
-    int tmpPos = sc ->getPos();
-    int tmpLine = sc -> getLine();
-    t = sc -> scanner(lex);
-    if(t != TIdent)
-        sc -> printError("Ожидался идентификатор",lex);
-    int tmpUk2 = sc -> getUK();
-    t = sc -> scanner(lex);
-
-    //Если после идентификатора равно - это присваивание
-    if(t == TSave){
-        sc -> setUK(tmpUk);
-        sc -> setLine(tmpLine);
-        sc -> setPos(tmpPos);
-        assign();
-    }
-    else
-        sc -> setUK(tmpUk2);
 }
 
 void Diagram::assign() {
     TypeLex lex;
-    int t, tmpUk;
+    int t;
 
     TypeLex ident;
 
     t = sc->scanner(lex);
-    strcpy(ident, lex);
+
     if (t != TIdent) {
         sc->printError("Ожидался идентификатор", lex);
     }
@@ -150,29 +143,6 @@ void Diagram::assign() {
     expression1();
 }
 
-void Diagram::myFor() {
-    TypeLex lex; int t;
-    t=sc->scanner(lex);
-    if (t!=TFor)
-        sc->printError("ожидался символ for", lex);
-    t=sc->scanner(lex);
-    if (t!=TLeftRoundSkob)
-        sc->printError("ожидался символ (", lex);
-    assign();
-    t=sc->scanner(lex);
-    if (t!=TTZpt)
-        sc->printError("ожидался символ ;", lex);
-    expression1();
-    t=sc->scanner(lex);
-    if (t!=TTZpt)
-        sc->printError("ожидался символ ;", lex);
-    expression1();
-    t=sc->scanner(lex);
-    if (t!=TRightRoundSkob)
-        sc->printError("ожидался символ )", lex);
-    oper();
-    //printf("Найден for\n");
-}
 
 void Diagram::sostOper() {
     TypeLex lex; int t;
@@ -204,18 +174,6 @@ void Diagram::blokSostOper() {
     sc -> setUK(tmpUk);
 }
 
-void Diagram::myReturn() {
-    TypeLex lex; int t;
-    t = sc->scanner(lex);
-    if(t != TReturn)
-        sc->printError("Ожидалось ключевое слово return", lex);
-    expression1();
-
-    t = sc->scanner(lex);
-    if(t != TTZpt)
-        sc->printError("Ожидался символ ;", lex);
-}
-
 void Diagram::oper() {
     TypeLex lex; int t;
     int tmpUk = sc -> getUK();
@@ -236,8 +194,23 @@ void Diagram::oper() {
         return;
     }
     if(t == TFor){
-        sc -> setUK(tmpUk);
-        myFor();
+        t = sc->scanner(lex);
+        if (t != TLeftRoundSkob)
+            sc->printError("ожидался символ (", lex);
+        assign();
+        t = sc->scanner(lex);
+        if (t != TTZpt)
+            sc->printError("ожидался символ ;", lex);
+        expression1();
+        t = sc->scanner(lex);
+        if (t != TTZpt)
+            sc->printError("ожидался символ ;", lex);
+        //TODO: Присваивание или выр1 ?
+        expression1();
+        t = sc->scanner(lex);
+        if (t != TRightRoundSkob)
+            sc->printError("ожидался символ )", lex);
+        oper();
         return;
     }
     if(t == TLeftFigSkob){
@@ -246,8 +219,10 @@ void Diagram::oper() {
         return;
     }
     if(t == TReturn){
-        sc -> setUK(tmpUk);
-        myReturn();
+        expression1();
+        t = sc->scanner(lex);
+        if (t != TTZpt)
+            sc->printError("Ожидался символ ;", lex);
         return;
     }
     sc -> printError("Ожидался оператор",lex);
