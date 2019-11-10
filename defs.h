@@ -8,17 +8,29 @@
 #include <iostream>
 #include <cstring>
 
+/**
+ * Максимальные числа:
+ * short = 	32767
+ * int
+ * */
+
+
+
 // Максимальная длина исходного модуля
 #define MAX_TEXT 10000
 // Максимальная длина лексемы
 #define MAX_LEX 100
-// Максимальная длина целой константы типа int,long
-#define MAX_LEN_INT10 10
-// Максимальная длина целой константы типа int,long
-#define MAX_LEN_INT16 7
+
 // Максимальное количество ключевых слов
 #define MAX_NUM_KEY_WORD 5
+const char MAX_SHORT_10[] = {'3', '2', '7', '6', '7', '\0'};
+const char MAX_SHORT_16[] = {'f', 'f', '\0'};
 
+const char MAX_INT_10[] = {"2147483647\0"};
+const char MAX_INT_16[] = {'f', 'f', 'f', 'f', '\0'};
+
+const char MAX_LONGLONG_10[] = {"9223372036854775807\0"};
+const char MAX_LONGLONG_16[] = {'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', '\0'};
 //Ключевые слова
 #define TFor 1
 #define TReturn 2
@@ -74,12 +86,31 @@
 
 //Типы предупреждений
 #define WLongId 20
+#define WPrivedenie 21
+#define WDifferentTypesFunc 22
+#define WSmallType 23
+#define WUndefined 24
 
+// ---------------------------- Типы узлов в дереве -----------------------------
+
+#define TNodeEmpty 0
+#define TNodeVar 1
+#define TNodeFunction 2
+#define TNodeConst 3
+
+const char *TNodeToName(int TNode);
+
+// -------------------------------- Типы данных ---------------------------------
+#define TDataUndefined 0
+#define TDataShort 1
+#define TDataInt 2
+#define TDataLong 3
+#define TDataLongLong 4
+
+std::string TDataToName(int TData);
 
 typedef char TypeMod[MAX_TEXT];
 typedef char TypeLex[MAX_LEX];
 
 
-//Красный цвет для вывода в консоль
-#define KRED  "\x1B[31m"
 #endif //COMPC___DEFS_H

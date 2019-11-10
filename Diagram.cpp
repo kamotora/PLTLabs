@@ -23,6 +23,7 @@ void Diagram::prog() {
         sc->setUK(tmpUk);
     }
 
+
     if (t != TEnd) {
         sc->printError("ожидался short, long, int", lex);
     }
@@ -42,19 +43,26 @@ void Diagram::description() {
         }
     sc -> setUK(tmpUk);
     if(isFunc){
-        type();
-        t = sc -> scanner(lex);
-        TypeLex mem;
-        strcpy(mem,lex);
-        if(t != TIdent)
-            sc ->printError("Ожидался идентификатор",lex);
-        t = sc -> scanner(lex);
-        if(t != TLeftRoundSkob)
-            sc ->printError("Ожидался символ (",lex);
-        t = sc -> scanner(lex);
-        if(t != TRightRoundSkob)
-            sc ->printError("Ожидался символ )",lex);
+        int typeData = type();
+        t = sc->scanner(lex);
+        TypeLex _id;
+        strcpy(_id, lex);
+        if (t != TIdent)
+            sc->printError("Ожидался идентификатор", lex);
+        t = sc->scanner(lex);
+        if (t != TLeftRoundSkob)
+            sc->printError("Ожидался символ (", lex);
+        t = sc->scanner(lex);
+        if (t != TRightRoundSkob)
+            sc->printError("Ожидался символ )", lex);
+
+        //--- СЕМ 1 ---//
+        Tree *v = root->semAddNode(_id, TNodeFunction, typeData, sc);
+        //sc->printNum();
+        //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(TNodeFunction), TDataToName(typeData));
         sostOper();
+        root->setCur(v);
+        //--- end СЕМ 1 ---//
     }
     else{
       data();
@@ -63,96 +71,138 @@ void Diagram::description() {
 }
 
 void Diagram::data() {
-    type();
+    int typeData = type();
     TypeLex lex;
     int t, tmpUk;
     do {
-        tmpUk = sc->getUK();
-        int tmpPos = sc->getPos();
-        int tmpLine = sc->getLine();
         t = sc->scanner(lex);
         if (t != TIdent)
             sc->printError("Ожидался идентификатор", lex);
-        int tmpUk2 = sc->getUK();
+        // --- СЕМ 3 ---//
+        Tree *v = root->semAddNode(lex, TNodeVar, typeData, sc);
+        //sc->printNum();
+        //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(TNodeVar), TDataToName(typeData));
+        //--- end СЕМ 3 ---//
+        tmpUk = sc->getUK();
         t = sc->scanner(lex);
 
-        //Если после идентификатора равно - это присваивание
+        //Если после идентификатора равно - это присваивание Выражения 1
         if (t == TSave) {
-            sc->setUK(tmpUk);
-            sc->setLine(tmpLine);
-            sc->setPos(tmpPos);
-            assign();
+            //--- СЕМ 4 ---//
+            Node res;
+            res.typeData = v->getNode()->typeData;
+            strcpy(res.id, v->getNode()->id);
+            expression1(&res);
+            int type1 = v->getNode()->typeData;
+            int type2 = res.typeData;
+            std::string str;
+            if (type1 < type2)
+                sc->printWarningTypes(type1, type2, WSmallType);
+            if (type1 > type2)
+                sc->printWarningTypes(type2, type1, WPrivedenie);
+            v->getNode()->init = true;
+            //--- end СЕМ 4 ---//
         } else
-            sc->setUK(tmpUk2);
-        //tmpUk = sc -> getUK();
+            sc->setUK(tmpUk);
         t = sc->scanner(lex);
     } while (t == TZpt);
-    //sc->setUK(tmpUk);
-    //t = sc -> scanner(lex);
     if(t != TTZpt)
         sc->printError("Ожидался символ ;", lex);
 }
 
-
-void Diagram::type() {
+//--- СЕМ 2 ---//
+int Diagram::type() {
     TypeLex l;
     int t, tmpUk;
-    t = sc -> scanner(l);
-    if(t != TLong && t != TInt && t != TShort)
-        sc -> printError("Ожидался тип данных (long, short или int");
-    if(t == TInt)
+    t = sc->scanner(l);
+    if (t != TLong && t != TInt && t != TShort)
+        sc->printError("Ожидался тип данных (long, short или int");
+    if (t == TInt)
         //int
-        return;
-    if(t == TShort){
+        return TDataInt;
+    int typeData = -1;
+    if (t == TShort) {
         //найден short
         //не выходим, т.к. можем найти int
+        typeData = TDataShort;
     }
-    if(t == TLong){
+    if (t == TLong) {
         tmpUk = sc->getUK();
-        t = sc -> scanner(l);
-        if(t == TLong){
-            //long long
+        t = sc->scanner(l);
+        typeData = TDataLong;
+        if (t == TLong) {
+            typeData = TDataLongLong;
         } else
             sc->setUK(tmpUk);
     }
     tmpUk = sc->getUK();
-    t = sc -> scanner(l);
-    if(t == TInt){
+    t = sc->scanner(l);
+
+    if (t == TInt) {
         //short int,long int,long long int
-        return;
     } else
         //short,long,long long
         sc->setUK(tmpUk);
-
+    if (typeData == -1)
+        sc->printError("Ошибка при определении типа данных");
+    return typeData;
 }
 
 void Diagram::assign() {
     TypeLex lex;
     int t;
 
-    TypeLex ident;
 
     t = sc->scanner(lex);
 
     if (t != TIdent) {
         sc->printError("Ожидался идентификатор", lex);
     }
+    //--- СЕМ 11 ---//
+    Tree *v = root->semGetVar(lex, sc);
+    //sc->printNum();
+    //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
+    //--- end СЕМ 11 ---//
     t = sc->scanner(lex);
-    if(t != TSave)
-        sc->printError("Ожидался знак = ",lex);
-    expression1();
+    if (t != TSave)
+        sc->printError("Ожидался знак = ", lex);
+    //--- СЕМ 4 ---//
+    Node res;
+    int type1;
+    if (v != nullptr) {
+        res.typeData = v->getNode()->typeData;
+        strcpy(res.id, v->getNode()->id);
+        type1 = v->getNode()->typeData;
+        v->getNode()->init = true;
+    } else
+        type1 = TDataUndefined;
+    expression1(&res);
+    int type2 = res.typeData;
+    if (type1 < type2)
+        sc->printWarningTypes(type1, type2, WSmallType);
+    if (type1 > type2)
+        sc->printWarningTypes(type2, type1, WPrivedenie);
+    //--- end СЕМ 4 ---//
+
 }
 
 
 void Diagram::sostOper() {
-    TypeLex lex; int t;
+    TypeLex lex;
+    int t;
     t = sc->scanner(lex);
-    if(t != TLeftFigSkob)
+    if (t != TLeftFigSkob)
         sc->printError("Ожидался символ {", lex);
+    //--- Добавление блока ---//
+    Tree *v = root->semAddBlock();
     blokSostOper();
+    //sc->printNum();
+    //printf("Найден блок\n");
     t = sc->scanner(lex);
-    if(t != TRightFigSkob)
+    if (t != TRightFigSkob)
         sc->printError("Ожидался символ }", lex);
+    //--- Назад ---//
+    root->setCur(v);
 }
 
 void Diagram::blokSostOper() {
@@ -195,150 +245,262 @@ void Diagram::oper() {
     }
     if(t == TFor){
         t = sc->scanner(lex);
+        Node res;
         if (t != TLeftRoundSkob)
             sc->printError("ожидался символ (", lex);
         assign();
         t = sc->scanner(lex);
         if (t != TTZpt)
             sc->printError("ожидался символ ;", lex);
-        expression1();
+        expression1(&res);
         t = sc->scanner(lex);
         if (t != TTZpt)
             sc->printError("ожидался символ ;", lex);
         //TODO: Присваивание или выр1 ?
-        expression1();
+        expression1(&res);
         t = sc->scanner(lex);
         if (t != TRightRoundSkob)
             sc->printError("ожидался символ )", lex);
         oper();
         return;
     }
-    if(t == TLeftFigSkob){
-        sc -> setUK(tmpUk);
+    if (t == TLeftFigSkob) {
+        sc->setUK(tmpUk);
         sostOper();
         return;
     }
-    if(t == TReturn){
-        expression1();
+    if (t == TReturn) {
+        Node res2;
+        expression1(&res2);
         t = sc->scanner(lex);
         if (t != TTZpt)
             sc->printError("Ожидался символ ;", lex);
+        //--- СЕМ 5 ---//
+
+        int type1 = res2.typeData;
+        Node *func = root->findUp(TNodeFunction)->getNode();
+        int type2 = func->typeData;
+        if (type1 != type2) {
+            sc->printWarningTypes(type2, type1, WDifferentTypesFunc);
+        }
+        func->init = true;
+
+        //--- end СЕМ 5 ---//
         return;
     }
     sc -> printError("Ожидался оператор",lex);
 }
 
-void Diagram::expression1() {
-    TypeLex lex; int t;
+void Diagram::expression1(Node *res) {
+    TypeLex lex;
+    int t;
     int tmpUk;
-    tmpUk = sc ->getUK();
+    tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    if(t == TPlus || t == TMinus){
+    if (t == TPlus || t == TMinus) {
         //унарный + -
-    }else
+    } else
         sc->setUK(tmpUk);
-    expression2();
-    tmpUk = sc ->getUK();
+    expression2(res);
+    tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    while(t == TNEQ || t == TEQ){
-        expression2();
-        tmpUk = sc ->getUK();
+    Node res1;
+    while (t == TNEQ || t == TEQ) {
+        expression2(&res1);
+        //--- СЕМ 8 ---//
+        res->typeData = TDataInt;
+        //--- end СЕМ 8 ---//
+        tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
-    sc -> setUK(tmpUk);
+    sc->setUK(tmpUk);
 }
-void Diagram::expression2() {
-    expression3();
-    TypeLex lex; int t;
+
+void Diagram::expression2(Node *res) {
+    expression3(res);
+    TypeLex lex;
+    int t;
     int tmpUk;
-    tmpUk = sc ->getUK();
+    tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    while(t == TGE || t == TGT || t == TLE || t == TLT){
-        expression3();
-        tmpUk = sc ->getUK();
+    Node res1;
+    while (t == TGE || t == TGT || t == TLE || t == TLT) {
+        expression3(&res1);
+        // -- СЕМ 8 -- //
+        if (res)
+            res->typeData = TDataInt;
+        // --  end СЕМ 8 -- //
+        tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
-    sc -> setUK(tmpUk);
+    sc->setUK(tmpUk);
 }
-void Diagram::expression3() {
-    expression4();
-    TypeLex lex; int t;
+
+void Diagram::expression3(Node *res) {
+    expression4(res);
+    TypeLex lex;
+    int t;
     int tmpUk;
-    tmpUk = sc ->getUK();
+    tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    while(t == TPlus || t == TMinus){
-        expression4();
-        tmpUk = sc ->getUK();
+    Node res1;
+    while (t == TPlus || t == TMinus) {
+        expression4(&res1);
+        // -- СЕМ 8 -- //
+        sem8(res, &res1);
+        //--  end СЕМ 8 -- //
+        tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
-    sc -> setUK(tmpUk);
+    sc->setUK(tmpUk);
 }
-void Diagram::expression4() {
-    expression5();
-    TypeLex lex; int t;
+
+void Diagram::expression4(Node *res) {
+    expression5(res);
+    TypeLex lex;
+    int t;
     int tmpUk;
-    tmpUk = sc ->getUK();
+    tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    while(t == TMul || t == TDiv || t == TMod){
-        expression5();
-        tmpUk = sc ->getUK();
+    Node res1;
+    while (t == TMul || t == TDiv || t == TMod) {
+        expression5(&res1);
+        // -- СЕМ 8 -- //
+        sem8(res, &res1);
+        //--  end СЕМ 8 -- //
+        tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
-    sc -> setUK(tmpUk);
+    sc->setUK(tmpUk);
 }
-void Diagram::expression5() {
-    TypeLex lex; int t;
+
+void Diagram::expression5(Node *res) {
+    TypeLex lex;
+    int t;
     int tmpUk;
-    tmpUk = sc ->getUK();
+    tmpUk = sc->getUK();
     t = sc->scanner(lex);
     bool isPref = false;
-    if(t == TAddSelf || t == TSubSelf){
+    if (t == TAddSelf || t == TSubSelf) {
         isPref = true;
-    }
-    else
+        // -- СЕМ 9 -- //
+        if (res->typeNode == TNodeConst)
+            sc->printError("Попытка применить операторы ++ или -- к константе");
+        //--  end СЕМ 9 -- //
+    } else
         sc->setUK(tmpUk);
-    expression6();
-    if(!isPref){
-        tmpUk = sc -> getUK();
+    expression6(res);
+    if(!isPref) {
+        tmpUk = sc->getUK();
         t = sc->scanner(lex);
-        if(t == TAddSelf || t == TSubSelf){
+        if (t == TAddSelf || t == TSubSelf) {
+            // -- СЕМ 9 -- //
+            if (res->typeNode == TNodeConst)
+                sc->printError("Попытка применить операторы ++ или -- к константе");
+            //--  end СЕМ 9 -- //
             return;
-        }
-        else
+        } else
             sc->setUK(tmpUk);
     }
 }
-void Diagram::expression6() {
-    TypeLex lex; int t;
+
+void Diagram::expression6(Node *res) {
+    TypeLex lex;
+    int t;
     t = sc->scanner(lex);
-    if(t != TIdent && t != TConst10 && t != TConst16 && t != TLeftRoundSkob){
-        sc -> printError("Ожидался идентификатор, констанста, скобка",lex);
+    if (t != TIdent && t != TConst10 && t != TConst16 && t != TLeftRoundSkob) {
+        sc->printError("Ожидался идентификатор, констанста, скобка", lex);
     }
-    if(t == TLeftRoundSkob){
-        expression1();
+    if (t == TLeftRoundSkob) {
+        expression1(res);
         t = sc->scanner(lex);
-        if(t != TRightRoundSkob)
+        if (t != TRightRoundSkob)
             sc->printError("Ожидался символ )", lex);
         return;
     }
-    if(t == TIdent){
+    if (t == TIdent) {
+        TypeLex _id;
+        strcpy(_id, lex);
         //Проверка на вызов функции
-        int tmpUk = sc -> getUK();
+        int tmpUk = sc->getUK();
         t = sc->scanner(lex);
-        if(t == TLeftRoundSkob){
-            t = sc -> scanner(lex);
-            if(t != TRightRoundSkob)
+        if (t == TLeftRoundSkob) {
+            t = sc->scanner(lex);
+            if (t != TRightRoundSkob)
                 sc->printError("Ожидался символ )", lex);
-        }
-        else
+            res->typeNode = TNodeFunction;
+            // -- СЕМ 10 -- //
+            Tree *v = root->semGetFunc(_id, sc);
+            if (v == nullptr) {
+                res = new Node(TNodeFunction);
+            } else {
+                res->typeData = v->getNode()->typeData;
+                res->init = v->getNode()->init;
+            }
+
+            //sc->printNum();
+            //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
+
+        } else {
             sc->setUK(tmpUk);
+            // -- СЕМ 11 -- //
+            Tree *v = root->semGetVar(_id, sc);
+            if (v == nullptr)
+                res = new Node(TNodeVar);
+            else {
+                res->typeNode = TNodeVar;
+                res->typeData = v->getNode()->typeData;
+                res->init = v->getNode()->init;
+                strcpy(res->id, v->getNode()->id);
+            }
+            //sc->printNum();
+            //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
+
+        }
         return;
     }
 
-    if(t == TConst16){
+    if (t == TConst16) {
+        // -- СЕМ 12 -- //
+        bool isShort = res->typeData == TDataShort;
+        res->typeData = sc->getTypeConst(lex, t, isShort);
+        res->typeNode = TNodeConst;
+        res->init = true;
+        // -- end СЕМ 12 -- //
         return;
     }
-    if(t == TConst10){
+    if (t == TConst10) {
+        // -- СЕМ 12 -- //
+        bool isShort = res->typeData == TDataShort;
+        res->typeData = sc->getTypeConst(lex, t, isShort);
+        res->typeNode = TNodeConst;
+        res->init = true;
+        // -- end СЕМ 12 -- //
         return;
     }
+}
+
+void Diagram::sem8(Node *res1, Node *res2) {
+    int type1 = res1->typeData;
+    int type2 = res2->typeData;
+
+    if (type1 == TDataUndefined || type2 == TDataUndefined) {
+        res1->typeData = TDataUndefined;
+    } else {
+        if (type1 < type2) {
+            sc->printWarningTypes(type1, type2, WPrivedenie);
+            res1->typeData = type2;
+        }
+        if (type1 > type2) {
+            sc->printWarningTypes(type2, type1, WPrivedenie);
+            res2->typeData = type1;
+        }
+        // -- проверка на инициализацию -- //
+        if (!res1->init)
+            sc->printWarning(WUndefined, res1->id);
+        if (!res2->init)
+            sc->printWarning(WUndefined, res2->id);
+        // -- конец проверки на инициализацию -- //
+    }
+
 }

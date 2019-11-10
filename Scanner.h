@@ -6,7 +6,6 @@
 #define COMPC___SCANNER_H
 
 #include "defs.h"
-using namespace std;
 
 class Scanner{
 private:
@@ -28,7 +27,7 @@ public:
 
     void printError(int typeError);
 
-    void printWarning(int typeError);
+    void printWarning(const std::string &error);
 
     void setPos(int _pos);
 
@@ -40,8 +39,19 @@ public:
 
     int getLine();
 
-    void printError(const string &error);
+    void printError(const std::string &error);
 
-    void printError(string error, char *lex);
+    void printError(std::string error, char *lex);
+
+    void printError(std::string error, char *lex, bool needExit);
+
+    void printNum();
+
+    int getTypeConst(char *lex, int typeConst, bool isShort = false);
+
+    void printWarningTypes(int type1, int type2, int typeWarning);
+
+    void printWarning(int typeError, char *lex = nullptr);
+
 };
 #endif //COMPC___SCANNER_H

@@ -6,50 +6,60 @@
 #define COMPC___DIAGRAM_H
 
 #include "Scanner.h"
+#include "Tree.h"
 
 
 class Diagram {
 private:
     Scanner *sc;
 public:
-    Diagram(Scanner * s) {sc=s;}
+    Tree *root = new Tree();
+
+    Diagram(Scanner *s) { sc = s; }
+
     //Программа
     void prog();
+
     //Описание
     void description();
+
     //Данные
     void data();
+
     //Тип
-    void type();
-    //Список
-    void list();
-    //Переменная
-    void var();
+    int type();
+
     //Присваивание
     void assign();
+
     //Составной оператор
     void sostOper();
+
     //Блок составного оператора
     void blokSostOper();
+
     //Оператор
     void oper();
-    //Return
-    void myReturn();
-    //For
-    void myFor();
-    //Выражение 1
-    void expression1();
-    //Выражение 2
-    void expression2();
-    //Выражение 3
-    void expression3();
-    //Выражение 4
-    void expression4();
-    //Выражение 5
-    void expression5();
-    //Выражение 6
-    void expression6();
 
+    //Выражение 1
+    void expression1(Node *res);
+
+    //Выражение 2
+    void expression2(Node *res);
+
+    //Выражение 3
+    void expression3(Node *res);
+
+    //Выражение 4
+    void expression4(Node *res);
+
+    //Выражение 5
+    void expression5(Node *res);
+
+    //Выражение 6
+    void expression6(Node *res);
+
+    void sem8(Node *res1, Node *res2);
 };
 
 

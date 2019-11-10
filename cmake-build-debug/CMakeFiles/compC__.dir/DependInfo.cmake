@@ -6,6 +6,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/artem/compC++/Diagram.cpp" "/home/artem/compC++/cmake-build-debug/CMakeFiles/compC__.dir/Diagram.cpp.o"
   "/home/artem/compC++/Scanner.cpp" "/home/artem/compC++/cmake-build-debug/CMakeFiles/compC__.dir/Scanner.cpp.o"
+  "/home/artem/compC++/Tree.cpp" "/home/artem/compC++/cmake-build-debug/CMakeFiles/compC__.dir/Tree.cpp.o"
+  "/home/artem/compC++/defs.cpp" "/home/artem/compC++/cmake-build-debug/CMakeFiles/compC__.dir/defs.cpp.o"
   "/home/artem/compC++/main.cpp" "/home/artem/compC++/cmake-build-debug/CMakeFiles/compC__.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

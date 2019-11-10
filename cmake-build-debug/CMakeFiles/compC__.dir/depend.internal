@@ -5,13 +5,23 @@ CMakeFiles/compC__.dir/Diagram.cpp.o
  /home/artem/compC++/Diagram.cpp
  /home/artem/compC++/Diagram.h
  /home/artem/compC++/Scanner.h
+ /home/artem/compC++/Tree.h
  /home/artem/compC++/defs.h
 CMakeFiles/compC__.dir/Scanner.cpp.o
  /home/artem/compC++/Scanner.cpp
  /home/artem/compC++/Scanner.h
  /home/artem/compC++/defs.h
+CMakeFiles/compC__.dir/Tree.cpp.o
+ /home/artem/compC++/Scanner.h
+ /home/artem/compC++/Tree.cpp
+ /home/artem/compC++/Tree.h
+ /home/artem/compC++/defs.h
+CMakeFiles/compC__.dir/defs.cpp.o
+ /home/artem/compC++/defs.cpp
+ /home/artem/compC++/defs.h
 CMakeFiles/compC__.dir/main.cpp.o
  /home/artem/compC++/Diagram.h
  /home/artem/compC++/Scanner.h
+ /home/artem/compC++/Tree.h
  /home/artem/compC++/defs.h
  /home/artem/compC++/main.cpp

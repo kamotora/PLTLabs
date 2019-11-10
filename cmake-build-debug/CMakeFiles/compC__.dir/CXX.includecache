@@ -6,17 +6,49 @@
 
 #IncludeRegexTransform: 
 
+/home/artem/compC++/Diagram.cpp
+Diagram.h
+/home/artem/compC++/Diagram.h
+
+/home/artem/compC++/Diagram.h
+Scanner.h
+/home/artem/compC++/Scanner.h
+Tree.h
+/home/artem/compC++/Tree.h
+
 /home/artem/compC++/Scanner.cpp
 Scanner.h
 /home/artem/compC++/Scanner.h
+cstring
+-
 
 /home/artem/compC++/Scanner.h
 defs.h
 /home/artem/compC++/defs.h
+
+/home/artem/compC++/Tree.cpp
+Tree.h
+/home/artem/compC++/Tree.h
+
+/home/artem/compC++/Tree.h
+defs.h
+/home/artem/compC++/defs.h
+Scanner.h
+/home/artem/compC++/Scanner.h
 
 /home/artem/compC++/defs.h
 iostream
 -
 cstring
 -
+
+/home/artem/compC++/main.cpp
+iostream
+-
+defs.h
+/home/artem/compC++/defs.h
+Scanner.h
+/home/artem/compC++/Scanner.h
+Diagram.h
+/home/artem/compC++/Diagram.h
 

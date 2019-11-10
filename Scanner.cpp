@@ -1,4 +1,5 @@
 #include "Scanner.h"
+#include <cstring>
 /**
 Программа: главная программа языка С++. Допускается описание функций без параметров, функции возвращают значение.
 Типы данных: int ( в том числе  short , long, long long) .
@@ -26,51 +27,99 @@ bool Scanner::isDigit10(char ch) {
     return ch >= '0' && ch <= '9';
 }
 
+template<typename T>
+int getSize(T *mas) {
+    int i = 0;
+    for (i = 0; i < MAX_LEX && mas[i] != '\0'; i++);
+    return i;
+}
+
 bool Scanner::isDigit16(char ch) {
     return Scanner::isDigit10(ch) || ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'));
 }
 
-void Scanner::getData(const char * FileName) {
+void Scanner::getData(const char *FileName) {
 // ввод файла FileName, который содержит текст исходного модуля
     char aa;
-    FILE * in = fopen(FileName,"r");
-    if (in == nullptr){
+    FILE *in = fopen(FileName, "r");
+    if (in == nullptr) {
         printError("Отсутствует входной файл");
         exit(1);
     }
     int i = 0;
-    while(!feof(in)){
-        fscanf(in,"%c",&aa);
+    while (!feof(in)) {
+        fscanf(in, "%c", &aa);
         if (!feof(in))
-            t[i++]=aa;
-        if (i>=MAX_TEXT-1){
+            t[i++] = aa;
+        if (i >= MAX_TEXT - 1) {
             printError("Слишком большой размер исходного модуля");
             break;
         }
     }
     // приписываем знак ’\0’ в конец текста
-    t[i]='\0';
+    t[i] = '\0';
     fclose(in);
 }
 
-void Scanner::printError(const string& error) {
-    cout << "Ошибка! " <<  error << "\n";
+void Scanner::printError(const std::string &error) {
+    std::cout << "Ошибка! " << error << "\n";
     exit(1);
 }
 
-void Scanner::printError(string error, TypeLex lex) {
-    cerr << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " )\n";
+void Scanner::printWarning(const std::string &error) {
+    std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << error << "\n";
+}
+
+void Scanner::printWarningTypes(int type1, int type2, int typeWarning) {
+    if (type1 == TDataUndefined || type2 == TDataUndefined)
+        return;
+    switch (typeWarning) {
+        case WPrivedenie :
+            std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << "Приведение типа "
+                      << TDataToName(type1) << " к типу " << TDataToName(type2) << "\n";
+            break;
+        case WDifferentTypesFunc:
+            std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << "Несоответствие типа "
+                      << TDataToName(type2) << " функции и возвращаемого типа " << TDataToName(type1) << std::endl;
+            break;
+        case WSmallType:
+            std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << "Попытка записать в тип "
+                      << TDataToName(type1) << " данные типа " << TDataToName(type2)
+                      << ". Часть данных может быть утеряна" << std::endl;
+            break;
+    }
+}
+
+void Scanner::printError(std::string error, TypeLex lex) {
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " ) \n";
     exit(1);
 }
 
-void Scanner::printWarning(int typeError) {
-    printf("Предупреждение! Строка %d, позиция %d. ", line, pos);
+void Scanner::printError(std::string error, TypeLex lex, bool needExit) {
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " ) \n";
+    if (needExit)
+        exit(1);
+}
+
+void Scanner::printNum() {
+    std::cout << "Строка " << line << ", позиция " << pos << ": ";
+}
+
+void Scanner::printWarning(int typeError, TypeLex lex) {
+    printf("Предупреждение!  Строка %d, позиция %d. ", line, pos);
     switch (typeError) {
         case WLongId :
-            printf("Слишком длинный идентификатор. Его длина будет ограничена %d символами\n",MAX_LEX);
-        break;
+            std::cout << "Слишком длинный идентификатор. Его длина будет ограничена " << MAX_LEX << " символами\n";
+            break;
+        case WUndefined:
+            std::cout << "Использование неинициализированной переменной ";
+            if (lex != nullptr)
+                std::cout << lex;
+            std::cout << std::endl;
+            break;
+            break;
         default:
-            printf("Неизвестная ошибка %d\n",typeError);
+            printf("Неизвестная ошибка %d\n", typeError);
             break;
     }
 }
@@ -153,7 +202,7 @@ int Scanner::scanner(TypeLex lex)  {
                 while(isDigit16(t[uk])){
                     lex[i++] = t[uk++];
                     pos++;
-                    if(i == MAX_LEN_INT16){
+                    if (i > getSize(MAX_LONGLONG_16)) {
                         printError(ELongIntConst);
                         return TErr;
                     }
@@ -179,7 +228,7 @@ int Scanner::scanner(TypeLex lex)  {
             while(isDigit10(t[uk])){
                 lex[i++] = t[uk++];
                 pos++;
-                if(i == MAX_LEN_INT10){
+                if (i > getSize(MAX_LONGLONG_10)) {
                     printError(ELongIntConst);
                     return TErr;
                 }
@@ -328,6 +377,7 @@ int Scanner::getPos() {
 void Scanner::setPos(int _pos) {
     pos = _pos;
 }
+
 int Scanner::getLine() {
     return line;
 }
@@ -335,3 +385,46 @@ int Scanner::getLine() {
 void Scanner::setLine(int _line) {
     line = _line;
 }
+
+/*
+#define TDataInt 1
+#define TDataShort 2
+#define TDataLong 3
+#define TDataLongLong 4
+*/
+int Scanner::getTypeConst(TypeLex lex, int typeConst, bool isShort) {
+    int size = getSize(lex);
+    if (typeConst == TConst10) {
+        //TODO:Убрать isShort
+        if (isShort &&
+            (size < getSize(MAX_SHORT_10) || (size == getSize(MAX_SHORT_10) && strcmp(lex, MAX_SHORT_10) <= 0))) {
+            return TDataShort;
+        } else if (size < getSize(MAX_INT_10) || (size == getSize(MAX_INT_10) && strcmp(lex, MAX_INT_10) <= 0)) {
+            return TDataInt;
+        } else if (size < getSize(MAX_LONGLONG_10) ||
+                   (size == getSize(MAX_LONGLONG_10) && strcmp(lex, MAX_LONGLONG_10) <= 0)) {
+            return TDataLongLong;
+        } else {
+            this->printError(ELongIntConst);
+            return 0;
+        }
+    }
+    if (typeConst == TConst16) {
+        if (isShort &&
+            (size < getSize(MAX_SHORT_16) || (size == getSize(MAX_SHORT_16) && strcmp(lex, MAX_SHORT_16) <= 0))) {
+            return TDataShort;
+        } else if (size < getSize(MAX_INT_16) || (size == getSize(MAX_INT_16) && strcmp(lex, MAX_INT_16) <= 0)) {
+            return TDataInt;
+        } else if (size < getSize(MAX_LONGLONG_16) ||
+                   (size == getSize(MAX_LONGLONG_16) && strcmp(lex, MAX_LONGLONG_16) <= 0)) {
+            return TDataLongLong;
+        } else {
+            this->printError(ELongIntConst);
+            return 0;
+        }
+    }
+
+}
+
+
+

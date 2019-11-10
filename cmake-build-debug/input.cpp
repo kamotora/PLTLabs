@@ -1,30 +1,44 @@
-int a = 0X092f,b = 0xABA2,c ,d = 0;
-int fun() {
+int a = 0xBA, d;
+long long fun() {
+    int a = 0xBA, d;
+    long long b = fun();
+    short g = 0xA,i = 3,j;
+    {}{}{}{{{}{{;}}}{}};;;;;
+    //int a = 0xBA, d;
+    a = (a + b - ( d / ( g - (i * j)) ) );
+    {int a = 1;}
+    return a;
+}
 
-    a = (a - b - ( c - d - ( e - b - ( g - h - (i - j)))));
-
-//    b = 5 - (b - 7 - (a - fun()) - 5) - 1;
-    return 1 - 8;
-    a = b;
+int fun2(){
+    return a + d;
 }
 
 int cc = a - fun();
 
 int main() {
-    a = fun();
-    k = (a--)--;
-    d = test();
-    char = 8;
-    short int9 = 0X0FAA;
-    long ___q99999293193113wertyuiossdfghjkqwertyuAACV__ssdfghjk___q99999293193113wertyuiossdfghjkqwertyuAACV__ssdfghjk = 12390;
-    long l = -1324;
+    int a = 1, d = 0xBA, c = +3;
+    //int a = 3;
+    long long int q;
+    q = 1;
+    short b = +9;
+    a = ++fun();
+    //int a = ++fun2();
+    int l;
+    int i = 0;
     for(i = 0; i < 0xFF; i++){
-        a = (3 + ((b + i) * 2) % 0xF) * int9 / l;
+        long i = 44444444444;
+        for(i = 0; i < 0xFF; i++){
+            int test = 3;
+            a = (3 + cc * 2 * var) % 0xF * test / (((l)))*l;
+        }
+        //a = test + 3;
+        for(i = 0; i < 0xFF; i++){
+            int test = 4;
+            a = (3 + cc * 2) % 0xF * test / l;
+            return a;
+        }
+        return b;
     }
-    return a;
+    return q;
 }
-int d;
-
-string errorFunc(int a1,char a2, double a3){
-    char a[] = "OQWEQ002___`;//"}
-    //

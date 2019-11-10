@@ -4,11 +4,14 @@
 #include "Diagram.h"
 //#include "Scanner.cpp"
 //#include "Diagram.cpp"
+//#include "Tree.cpp"
+//#include "defs.cpp"
 
 using namespace std;
+
 int main(int argc, char *argv[]) {
-    Scanner * sc ;
-    const char * fileName = "input.cpp";
+    Scanner *sc;
+    const char *fileName = "input.cpp";
     if (argc <= 1)
         // файл по умолчанию
         sc = new Scanner(fileName);

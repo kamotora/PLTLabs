@@ -39,10 +39,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/artem/clion-2019.2.2/bin/cmake/linux/bin/cmake
+CMAKE_COMMAND = /home/artem/clion-193.4778.13/bin/cmake/linux/bin/cmake
 
 # The command to remove a file.
-RM = /home/artem/clion-2019.2.2/bin/cmake/linux/bin/cmake -E remove -f
+RM = /home/artem/clion-193.4778.13/bin/cmake/linux/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/artem/compC++/cmake-build-debug
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/artem/clion-2019.2.2/bin/cmake/linux/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/artem/clion-193.4778.13/bin/cmake/linux/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -70,7 +70,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/home/artem/clion-2019.2.2/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	/home/artem/clion-193.4778.13/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -177,6 +177,60 @@ Scanner.cpp.s:
 	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Scanner.cpp.s
 .PHONY : Scanner.cpp.s
 
+Tree.o: Tree.cpp.o
+
+.PHONY : Tree.o
+
+# target to build an object file
+Tree.cpp.o:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Tree.cpp.o
+.PHONY : Tree.cpp.o
+
+Tree.i: Tree.cpp.i
+
+.PHONY : Tree.i
+
+# target to preprocess a source file
+Tree.cpp.i:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Tree.cpp.i
+.PHONY : Tree.cpp.i
+
+Tree.s: Tree.cpp.s
+
+.PHONY : Tree.s
+
+# target to generate assembly for a file
+Tree.cpp.s:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Tree.cpp.s
+.PHONY : Tree.cpp.s
+
+defs.o: defs.cpp.o
+
+.PHONY : defs.o
+
+# target to build an object file
+defs.cpp.o:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/defs.cpp.o
+.PHONY : defs.cpp.o
+
+defs.i: defs.cpp.i
+
+.PHONY : defs.i
+
+# target to preprocess a source file
+defs.cpp.i:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/defs.cpp.i
+.PHONY : defs.cpp.i
+
+defs.s: defs.cpp.s
+
+.PHONY : defs.s
+
+# target to generate assembly for a file
+defs.cpp.s:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/defs.cpp.s
+.PHONY : defs.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -219,6 +273,12 @@ help:
 	@echo "... Scanner.o"
 	@echo "... Scanner.i"
 	@echo "... Scanner.s"
+	@echo "... Tree.o"
+	@echo "... Tree.i"
+	@echo "... Tree.s"
+	@echo "... defs.o"
+	@echo "... defs.i"
+	@echo "... defs.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

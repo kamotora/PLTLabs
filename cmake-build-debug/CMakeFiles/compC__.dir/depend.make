@@ -4,14 +4,24 @@
 CMakeFiles/compC__.dir/Diagram.cpp.o: ../Diagram.cpp
 CMakeFiles/compC__.dir/Diagram.cpp.o: ../Diagram.h
 CMakeFiles/compC__.dir/Diagram.cpp.o: ../Scanner.h
+CMakeFiles/compC__.dir/Diagram.cpp.o: ../Tree.h
 CMakeFiles/compC__.dir/Diagram.cpp.o: ../defs.h
 
 CMakeFiles/compC__.dir/Scanner.cpp.o: ../Scanner.cpp
 CMakeFiles/compC__.dir/Scanner.cpp.o: ../Scanner.h
 CMakeFiles/compC__.dir/Scanner.cpp.o: ../defs.h
 
+CMakeFiles/compC__.dir/Tree.cpp.o: ../Scanner.h
+CMakeFiles/compC__.dir/Tree.cpp.o: ../Tree.cpp
+CMakeFiles/compC__.dir/Tree.cpp.o: ../Tree.h
+CMakeFiles/compC__.dir/Tree.cpp.o: ../defs.h
+
+CMakeFiles/compC__.dir/defs.cpp.o: ../defs.cpp
+CMakeFiles/compC__.dir/defs.cpp.o: ../defs.h
+
 CMakeFiles/compC__.dir/main.cpp.o: ../Diagram.h
 CMakeFiles/compC__.dir/main.cpp.o: ../Scanner.h
+CMakeFiles/compC__.dir/main.cpp.o: ../Tree.h
 CMakeFiles/compC__.dir/main.cpp.o: ../defs.h
 CMakeFiles/compC__.dir/main.cpp.o: ../main.cpp
 

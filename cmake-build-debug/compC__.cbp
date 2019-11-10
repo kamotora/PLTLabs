@@ -96,6 +96,15 @@
 		<Unit filename="/home/artem/compC++/Scanner.h">
 			<Option target="compC__"/>
 		</Unit>
+		<Unit filename="/home/artem/compC++/Tree.cpp">
+			<Option target="compC__"/>
+		</Unit>
+		<Unit filename="/home/artem/compC++/Tree.h">
+			<Option target="compC__"/>
+		</Unit>
+		<Unit filename="/home/artem/compC++/defs.cpp">
+			<Option target="compC__"/>
+		</Unit>
 		<Unit filename="/home/artem/compC++/defs.h">
 			<Option target="compC__"/>
 		</Unit>
