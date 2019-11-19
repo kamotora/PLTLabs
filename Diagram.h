@@ -60,6 +60,19 @@ public:
     void expression6(Node *res);
 
     void sem8(Node *res1, Node *res2);
+
+
+    void sem10(Node *res, TypeLex nameFunc);
+
+    void sem11(Node *res, TypeLex nameVar);
+
+    void sem12(Node *res, TypeLex lexConst, int typeConst);
+
+    void sem9(Node *res);
+
+    void sem8Compare(Node *res);
+
+    void sem5(Node *res);
 };
 
 

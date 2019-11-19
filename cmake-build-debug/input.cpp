@@ -3,7 +3,7 @@ long long fun() {
     int a = 0xBA, d;
     long long b = fun();
     short g = 0xA,i = 3,j;
-    {}{}{}{{{}{{;}}}{}};;;;;
+    {}{}{}{{{;}{{a = a*a;}}}{}};;;;;
     //int a = 0xBA, d;
     a = (a + b - ( d / ( g - (i * j)) ) );
     {int a = 1;}
@@ -27,13 +27,16 @@ int main() {
     int l;
     int i = 0;
     for(i = 0; i < 0xFF; i++){
-        long i = 44444444444;
-        for(i = 0; i < 0xFF; i++){
+        long i = 444444;
+        for(i = 0; i <= 0xFF; i++){
             int test = 3;
             a = (3 + cc * 2 * var) % 0xF * test / (((l)))*l;
+            for(i = 0; i >= 0xFF; i++){
+                a = 3 != (--cc > 2 + (a + (a * (a / a)++))) == (l++) + (0xF < a) * test % l;
+            }
         }
         //a = test + 3;
-        for(i = 0; i < 0xFF; i++){
+        for(i = 0; i >= 0xFF; i++){
             int test = 4;
             a = (3 + cc * 2) % 0xF * test / l;
             return a;

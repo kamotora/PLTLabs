@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "Scanner.h"
 #include "Diagram.h"
+#include "LL1.h"
 //#include "Scanner.cpp"
 //#include "Diagram.cpp"
 //#include "Tree.cpp"
@@ -24,13 +25,21 @@ int main(int argc, char *argv[]) {
         printf("%s - тип %d \n",l, type);
     } while(type!=TEnd);
     */
+
+    /*
     Diagram *diagram = new Diagram(sc);
     diagram->prog();
-    int type; TypeLex lex;
-    type=sc->scanner(lex);
-    if (type==TEnd)
+     */
+
+    LL1 *anazyle = new LL1(sc);
+    anazyle->LL_1();
+    int type;
+    TypeLex lex;
+    type = sc->scanner(lex);
+    if (type == TEnd)
         printf("Синтаксических ошибок не обнаружено. \n");
     else
         sc->printError("Лишний текст в конце программы.");
+
     return 0;
 }

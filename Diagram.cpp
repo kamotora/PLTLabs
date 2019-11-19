@@ -158,7 +158,7 @@ void Diagram::assign() {
     if (t != TIdent) {
         sc->printError("Ожидался идентификатор", lex);
     }
-    //--- СЕМ 11 ---//
+    //--- СЕМ 11 особая))---//
     Tree *v = root->semGetVar(lex, sc);
     //sc->printNum();
     //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
@@ -276,15 +276,7 @@ void Diagram::oper() {
         if (t != TTZpt)
             sc->printError("Ожидался символ ;", lex);
         //--- СЕМ 5 ---//
-
-        int type1 = res2.typeData;
-        Node *func = root->findUp(TNodeFunction)->getNode();
-        int type2 = func->typeData;
-        if (type1 != type2) {
-            sc->printWarningTypes(type2, type1, WDifferentTypesFunc);
-        }
-        func->init = true;
-
+        sem5(&res2);
         //--- end СЕМ 5 ---//
         return;
     }
@@ -308,7 +300,7 @@ void Diagram::expression1(Node *res) {
     while (t == TNEQ || t == TEQ) {
         expression2(&res1);
         //--- СЕМ 8 ---//
-        res->typeData = TDataInt;
+        sem8Compare(res);
         //--- end СЕМ 8 ---//
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
@@ -327,8 +319,7 @@ void Diagram::expression2(Node *res) {
     while (t == TGE || t == TGT || t == TLE || t == TLT) {
         expression3(&res1);
         // -- СЕМ 8 -- //
-        if (res)
-            res->typeData = TDataInt;
+        sem8Compare(res);
         // --  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
@@ -384,8 +375,7 @@ void Diagram::expression5(Node *res) {
     if (t == TAddSelf || t == TSubSelf) {
         isPref = true;
         // -- СЕМ 9 -- //
-        if (res->typeNode == TNodeConst)
-            sc->printError("Попытка применить операторы ++ или -- к константе");
+        sem9(res);
         //--  end СЕМ 9 -- //
     } else
         sc->setUK(tmpUk);
@@ -395,8 +385,7 @@ void Diagram::expression5(Node *res) {
         t = sc->scanner(lex);
         if (t == TAddSelf || t == TSubSelf) {
             // -- СЕМ 9 -- //
-            if (res->typeNode == TNodeConst)
-                sc->printError("Попытка применить операторы ++ или -- к константе");
+            sem9(res);
             //--  end СЕМ 9 -- //
             return;
         } else
@@ -430,29 +419,14 @@ void Diagram::expression6(Node *res) {
                 sc->printError("Ожидался символ )", lex);
             res->typeNode = TNodeFunction;
             // -- СЕМ 10 -- //
-            Tree *v = root->semGetFunc(_id, sc);
-            if (v == nullptr) {
-                res = new Node(TNodeFunction);
-            } else {
-                res->typeData = v->getNode()->typeData;
-                res->init = v->getNode()->init;
-            }
-
+            sem10(res, _id);
             //sc->printNum();
             //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
 
         } else {
             sc->setUK(tmpUk);
             // -- СЕМ 11 -- //
-            Tree *v = root->semGetVar(_id, sc);
-            if (v == nullptr)
-                res = new Node(TNodeVar);
-            else {
-                res->typeNode = TNodeVar;
-                res->typeData = v->getNode()->typeData;
-                res->init = v->getNode()->init;
-                strcpy(res->id, v->getNode()->id);
-            }
+            sem11(res, _id);
             //sc->printNum();
             //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
 
@@ -462,22 +436,71 @@ void Diagram::expression6(Node *res) {
 
     if (t == TConst16) {
         // -- СЕМ 12 -- //
-        bool isShort = res->typeData == TDataShort;
-        res->typeData = sc->getTypeConst(lex, t, isShort);
-        res->typeNode = TNodeConst;
-        res->init = true;
+        sem12(res, lex, t);
         // -- end СЕМ 12 -- //
         return;
     }
     if (t == TConst10) {
         // -- СЕМ 12 -- //
-        bool isShort = res->typeData == TDataShort;
-        res->typeData = sc->getTypeConst(lex, t, isShort);
-        res->typeNode = TNodeConst;
-        res->init = true;
+        sem12(res, lex, t);
         // -- end СЕМ 12 -- //
         return;
     }
+}
+
+// Сем5 – проверка на соответствие типа, возвращаемого функцией и типа выражения 1.
+void Diagram::sem5(Node *resExpression1) {
+
+    int type1 = resExpression1->typeData;
+    Node *func = root->findUp(TNodeFunction)->getNode();
+    int type2 = func->typeData;
+    if (type1 != type2) {
+        sc->printWarningTypes(type2, type1, WDifferentTypesFunc);
+    }
+    func->init = true;
+
+}
+
+void Diagram::sem8Compare(Node *res) {
+    if (res)
+        res->typeData = TDataInt;
+}
+
+// Если константа, выполнить ++ или - - нельзя.
+void Diagram::sem9(Node *res) {
+    if (res->typeNode == TNodeConst)
+        sc->printError("Попытка применить операторы ++ или -- к константе");
+}
+
+void Diagram::sem10(Node *res, TypeLex nameFunc) {
+    Tree *v = root->semGetFunc(nameFunc, sc);
+    if (v == nullptr) {
+        res = new Node(TNodeFunction);
+    } else {
+        res->typeData = v->getNode()->typeData;
+        res->init = v->getNode()->init;
+    }
+}
+
+
+void Diagram::sem11(Node *res, TypeLex nameVar) {
+    Tree *v = root->semGetVar(nameVar, sc);
+    if (v == nullptr)
+        res = new Node(TNodeVar);
+    else {
+        res->typeNode = TNodeVar;
+        res->typeData = v->getNode()->typeData;
+        res->init = v->getNode()->init;
+        strcpy(res->id, v->getNode()->id);
+    }
+}
+
+// Вернуть тип константы (int, long, long long, short)
+void Diagram::sem12(Node *res, TypeLex lexConst, int typeConst) {
+    bool isShort = res->typeData == TDataShort;
+    res->typeData = sc->getTypeConst(lexConst, typeConst, isShort);
+    res->typeNode = TNodeConst;
+    res->init = true;
 }
 
 void Diagram::sem8(Node *res1, Node *res2) {

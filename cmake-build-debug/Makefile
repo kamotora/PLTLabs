@@ -150,6 +150,33 @@ Diagram.cpp.s:
 	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/Diagram.cpp.s
 .PHONY : Diagram.cpp.s
 
+LL1.o: LL1.cpp.o
+
+.PHONY : LL1.o
+
+# target to build an object file
+LL1.cpp.o:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/LL1.cpp.o
+.PHONY : LL1.cpp.o
+
+LL1.i: LL1.cpp.i
+
+.PHONY : LL1.i
+
+# target to preprocess a source file
+LL1.cpp.i:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/LL1.cpp.i
+.PHONY : LL1.cpp.i
+
+LL1.s: LL1.cpp.s
+
+.PHONY : LL1.s
+
+# target to generate assembly for a file
+LL1.cpp.s:
+	$(MAKE) -f CMakeFiles/compC__.dir/build.make CMakeFiles/compC__.dir/LL1.cpp.s
+.PHONY : LL1.cpp.s
+
 Scanner.o: Scanner.cpp.o
 
 .PHONY : Scanner.o
@@ -270,6 +297,9 @@ help:
 	@echo "... Diagram.o"
 	@echo "... Diagram.i"
 	@echo "... Diagram.s"
+	@echo "... LL1.o"
+	@echo "... LL1.i"
+	@echo "... LL1.s"
 	@echo "... Scanner.o"
 	@echo "... Scanner.i"
 	@echo "... Scanner.s"

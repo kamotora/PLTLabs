@@ -8,18 +8,13 @@
 #include <iostream>
 #include <cstring>
 
-/**
- * Максимальные числа:
- * short = 	32767
- * int
- * */
-
-
 
 // Максимальная длина исходного модуля
 #define MAX_TEXT 10000
 // Максимальная длина лексемы
 #define MAX_LEX 100
+// Максимальный размер магазина
+#define MAX_MAG 1000
 
 // Максимальное количество ключевых слов
 #define MAX_NUM_KEY_WORD 5
@@ -37,6 +32,7 @@ const char MAX_LONGLONG_16[] = {'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', '\0'};
 #define TInt 3
 #define TShort 4
 #define TLong 5
+#define TLongLong 6
 #define TIdent 20
 
 #define TConst10  30
@@ -71,7 +67,7 @@ const char MAX_LONGLONG_16[] = {'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', '\0'};
 #define TSubSelf 73
 
 //Конец исходного модуля
-#define TEnd 100
+#define TEnd 90
 //Ошибочный символ
 #define TErr 200
 
@@ -111,6 +107,34 @@ std::string TDataToName(int TData);
 
 typedef char TypeMod[MAX_TEXT];
 typedef char TypeLex[MAX_LEX];
+
+// -------------------------------- Нетерминалы ---------------------------------
+
+#define netermProgram 100
+#define netermDescription 101
+#define netermData 102
+#define netermType 103
+#define netermType2 104
+#define netermType3 105
+#define netermList 114
+#define netermList2 115
+#define netermAssign 116
+#define netermAssign2 117
+#define netermSostOper 118
+#define netermBlockSostOper 132
+#define netermOper 119
+#define netermExpr1 120
+#define netermExpr11 121
+#define netermExpr2 122
+#define netermExpr21 123
+#define netermExpr3 124
+#define netermExpr31 125
+#define netermExpr4 126
+#define netermExpr41 127
+#define netermExpr5 128
+#define netermExpr51 129
+#define netermExpr6 130
+#define netermFuncCallOrVar 131
 
 
 #endif //COMPC___DEFS_H

@@ -287,34 +287,31 @@ int Scanner::scanner(TypeLex lex)  {
     } else if (t[uk] == '>') {
         lex[i++] = t[uk++];
         pos++;
-        if (t[uk] != '='){
+        if (t[uk] == '=') {
             lex[i++] = t[uk++];
             pos++;
             return TGE;
-        }
-        else
+        } else
             return TGT;
 
     } else if (t[uk] == '<') {
         lex[i++] = t[uk++];
         pos++;
-        if (t[uk] != '='){
+        if (t[uk] == '=') {
             lex[i++] = t[uk++];
             pos++;
             return TLE;
-        }
-        else
+        } else
             return TLT;
 
     } else if (t[uk] == '!') {
         lex[i++] = t[uk++];
         pos++;
-        if (t[uk] != '='){
+        if (t[uk] == '=') {
             lex[i++] = t[uk++];
             pos++;
             return TNEQ;
-        }
-        else {
+        } else {
             printError(EWrongChar);
             return TErr;
         }
