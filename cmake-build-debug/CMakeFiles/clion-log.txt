@@ -1,4 +1,4 @@
-/home/artem/clion-193.4778.13/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/artem/compC++
+/home/artem/clion-2019.3/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/artem/compC++
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/artem/compC++/cmake-build-debug

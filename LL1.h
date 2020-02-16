@@ -7,6 +7,9 @@
 
 #include "defs.h"
 #include "Tree.h"
+#include <iostream>
+
+using namespace std;
 
 // максимальный размер магазина
 struct SymbMag {
@@ -60,6 +63,8 @@ public:
     bool expression41(int t, char *lex, int add = 0);
 
     bool expression51(int t, char *lex);
+
+    string codeToString(int code);
 };
 
 

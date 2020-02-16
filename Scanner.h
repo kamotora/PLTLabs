@@ -47,11 +47,14 @@ public:
 
     void printNum();
 
-    int getTypeConst(char *lex, int typeConst, bool isShort = false);
-
     void printWarningTypes(int type1, int type2, int typeWarning);
 
     void printWarning(int typeError, char *lex = nullptr);
 
+    int getTypeConst(long long int constanta, int typeConst);
+
+    void setUK(int i, int line, int pos);
+
+    void getUK(int &get_uk, int &get_line, int &get_pos);
 };
 #endif //COMPC___SCANNER_H

@@ -79,6 +79,7 @@ Tree *Tree::findUpOneLevel(Tree *from, char *id) {
     return NULL;
 }
 
+
 // отладочная программа печати дерева для интерпретатора
 void Tree::printTree() {
 
@@ -97,11 +98,11 @@ void Tree::printTree() {
     printf("\n");
 
     if (left != NULL) {
-        printf("слева: ");
+        printf("слева от %s: ", node->id);
         left->printTree();
     }
     if (right != NULL) {
-        printf("справа: ");
+        printf("справа: от %s: ", node->id);
         right->printTree();
     }
 
@@ -177,8 +178,9 @@ Tree *Tree::semAddBlock() {
     strcpy(emptyNode1.id, "###");
     strcpy(emptyNode2.id, "###");
     cur->setLeft(&emptyNode1);
-    cur = cur->left;
+    //TODO хз
     v = cur;
+    cur = cur->left;
     cur->setRight(&emptyNode2);
     cur = cur->right;
     return v;
@@ -188,3 +190,33 @@ Tree *Tree::semAddBlock() {
 Node *Tree::getNode() const {
     return node;
 }
+
+Tree *Tree::delBlock(bool needDeleteFunctions) {
+    Tree *res = nullptr;
+    /*
+    if(this->node->typeNode == TNodeFunction){
+        if(needDeleteFunctions){
+            res = this->up;
+            res->left->delTree();
+            res->left = nullptr;
+            return res;
+        } else
+            return this;
+    }
+     */
+    res = this;
+    //(res->left == this) ? res->left = nullptr : res->right = nullptr;
+    this->left->delTree();
+    res->left = nullptr;
+    return res;
+}
+
+void Tree::delTree() {
+    if (left != NULL)
+        left->delTree();
+    if (right != NULL)
+        right->delTree();
+    delete this;
+}
+
+

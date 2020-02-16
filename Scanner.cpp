@@ -91,7 +91,7 @@ void Scanner::printWarningTypes(int type1, int type2, int typeWarning) {
 }
 
 void Scanner::printError(std::string error, TypeLex lex) {
-    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " ) \n";
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ,найдено  " << lex << "  \n";
     exit(1);
 }
 
@@ -116,7 +116,6 @@ void Scanner::printWarning(int typeError, TypeLex lex) {
             if (lex != nullptr)
                 std::cout << lex;
             std::cout << std::endl;
-            break;
             break;
         default:
             printf("Неизвестная ошибка %d\n", typeError);
@@ -202,7 +201,7 @@ int Scanner::scanner(TypeLex lex)  {
                 while(isDigit16(t[uk])){
                     lex[i++] = t[uk++];
                     pos++;
-                    if (i > getSize(MAX_LONGLONG_16)) {
+                    if (i > SIZE_MAX_LONGLONG_16) {
                         printError(ELongIntConst);
                         return TErr;
                     }
@@ -228,7 +227,7 @@ int Scanner::scanner(TypeLex lex)  {
             while(isDigit10(t[uk])){
                 lex[i++] = t[uk++];
                 pos++;
-                if (i > getSize(MAX_LONGLONG_10)) {
+                if (i > SIZE_MAX_LONGLONG_10) {
                     printError(ELongIntConst);
                     return TErr;
                 }
@@ -355,6 +354,12 @@ void Scanner::newLine() {
     pos = 0;
 }
 
+void Scanner::setUK(int set_uk, int set_line, int set_pos) {
+    uk = set_uk;
+    line = set_line;
+    pos = set_pos;
+}
+
 void Scanner::setUK(int i) {
     uk = i;
     line = tmpLine;
@@ -365,6 +370,12 @@ int Scanner::getUK() {
     tmpLine = line;
     tmpPos = pos;
     return uk;
+}
+
+void Scanner::getUK(int &get_uk, int &get_line, int &get_pos) {
+    get_uk = uk;
+    get_line = line;
+    get_pos = pos;
 }
 
 int Scanner::getPos() {
@@ -388,39 +399,14 @@ void Scanner::setLine(int _line) {
 #define TDataShort 2
 #define TDataLong 3
 #define TDataLongLong 4
-*/
-int Scanner::getTypeConst(TypeLex lex, int typeConst, bool isShort) {
-    int size = getSize(lex);
-    if (typeConst == TConst10) {
-        //TODO:Убрать isShort
-        if (isShort &&
-            (size < getSize(MAX_SHORT_10) || (size == getSize(MAX_SHORT_10) && strcmp(lex, MAX_SHORT_10) <= 0))) {
-            return TDataShort;
-        } else if (size < getSize(MAX_INT_10) || (size == getSize(MAX_INT_10) && strcmp(lex, MAX_INT_10) <= 0)) {
-            return TDataInt;
-        } else if (size < getSize(MAX_LONGLONG_10) ||
-                   (size == getSize(MAX_LONGLONG_10) && strcmp(lex, MAX_LONGLONG_10) <= 0)) {
-            return TDataLongLong;
-        } else {
-            this->printError(ELongIntConst);
-            return 0;
-        }
-    }
-    if (typeConst == TConst16) {
-        if (isShort &&
-            (size < getSize(MAX_SHORT_16) || (size == getSize(MAX_SHORT_16) && strcmp(lex, MAX_SHORT_16) <= 0))) {
-            return TDataShort;
-        } else if (size < getSize(MAX_INT_16) || (size == getSize(MAX_INT_16) && strcmp(lex, MAX_INT_16) <= 0)) {
-            return TDataInt;
-        } else if (size < getSize(MAX_LONGLONG_16) ||
-                   (size == getSize(MAX_LONGLONG_16) && strcmp(lex, MAX_LONGLONG_16) <= 0)) {
-            return TDataLongLong;
-        } else {
-            this->printError(ELongIntConst);
-            return 0;
-        }
-    }
+typeConst - 10cc or 16cc
+ */
 
+int Scanner::getTypeConst(long long constanta, int typeConst) {
+    if (INT32_MIN < constanta && constanta < INT32_MAX)
+        return TDataInt;
+    else
+        return TDataLongLong;
 }
 
 

@@ -4,6 +4,8 @@
 
 #include "Diagram.h"
 
+bool Diagram::flagInterpret = true;
+
 void Diagram::prog() {
     TypeLex lex;
     int t, tmpUk;
@@ -26,7 +28,8 @@ void Diagram::prog() {
 
     if (t != TEnd) {
         sc->printError("ожидался short, long, int", lex);
-    }
+    } else
+        printf("Синтаксических ошибок не обнаружено. \n");
 }
 
 void Diagram::description() {
@@ -55,14 +58,14 @@ void Diagram::description() {
         t = sc->scanner(lex);
         if (t != TRightRoundSkob)
             sc->printError("Ожидался символ )", lex);
-
-        //--- СЕМ 1 ---//
-        Tree *v = root->semAddNode(_id, TNodeFunction, typeData, sc);
-        //sc->printNum();
-        //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(TNodeFunction), TDataToName(typeData));
-        sostOper();
-        root->setCur(v);
-        //--- end СЕМ 1 ---//
+        sem1(_id, typeData);
+        bool isMain = strcmp(_id, "main") == 0;
+        if (!isMain)
+            flagInterpret = false;
+        Node *res = new Node;
+        sostOper(res);
+        if (!isMain)
+            flagInterpret = true;
     }
     else{
       data();
@@ -78,11 +81,7 @@ void Diagram::data() {
         t = sc->scanner(lex);
         if (t != TIdent)
             sc->printError("Ожидался идентификатор", lex);
-        // --- СЕМ 3 ---//
-        Tree *v = root->semAddNode(lex, TNodeVar, typeData, sc);
-        //sc->printNum();
-        //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(TNodeVar), TDataToName(typeData));
-        //--- end СЕМ 3 ---//
+        sem3(lex, typeData);
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
 
@@ -90,17 +89,9 @@ void Diagram::data() {
         if (t == TSave) {
             //--- СЕМ 4 ---//
             Node res;
-            res.typeData = v->getNode()->typeData;
-            strcpy(res.id, v->getNode()->id);
             expression1(&res);
-            int type1 = v->getNode()->typeData;
-            int type2 = res.typeData;
-            std::string str;
-            if (type1 < type2)
-                sc->printWarningTypes(type1, type2, WSmallType);
-            if (type1 > type2)
-                sc->printWarningTypes(type2, type1, WPrivedenie);
-            v->getNode()->init = true;
+            sem4(root->getCur()->getNode(), res);
+            sem91();
             //--- end СЕМ 4 ---//
         } else
             sc->setUK(tmpUk);
@@ -152,57 +143,59 @@ void Diagram::assign() {
     TypeLex lex;
     int t;
 
-
     t = sc->scanner(lex);
-
     if (t != TIdent) {
         sc->printError("Ожидался идентификатор", lex);
     }
+    Node res;
     //--- СЕМ 11 особая))---//
-    Tree *v = root->semGetVar(lex, sc);
-    //sc->printNum();
-    //printf("Найдено использование %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(v->getNode()->typeNode), TDataToName(v->getNode()->typeData));
-    //--- end СЕМ 11 ---//
+    Tree *v = sem11(&res, lex);
+
     t = sc->scanner(lex);
     if (t != TSave)
         sc->printError("Ожидался знак = ", lex);
-    //--- СЕМ 4 ---//
-    Node res;
-    int type1;
-    if (v != nullptr) {
-        res.typeData = v->getNode()->typeData;
-        strcpy(res.id, v->getNode()->id);
-        type1 = v->getNode()->typeData;
-        v->getNode()->init = true;
-    } else
-        type1 = TDataUndefined;
+
+
+    //--- end СЕМ 11 ---//
     expression1(&res);
-    int type2 = res.typeData;
-    if (type1 < type2)
-        sc->printWarningTypes(type1, type2, WSmallType);
-    if (type1 > type2)
-        sc->printWarningTypes(type2, type1, WPrivedenie);
+    //--- СЕМ 4 ---//
+    if (v != nullptr)
+        sem4(v->getNode(), res);
+    else
+        sem4(nullptr, res); // nullptr - метод не должен работать, флаг = false
     //--- end СЕМ 4 ---//
+    sem91();
 
 }
 
 
-void Diagram::sostOper() {
+void Diagram::sostOper(Node *pNode) {
     TypeLex lex;
     int t;
     t = sc->scanner(lex);
     if (t != TLeftFigSkob)
         sc->printError("Ожидался символ {", lex);
     //--- Добавление блока ---//
-    Tree *v = root->semAddBlock();
+    Tree *v = nullptr;
+    if (flagInterpret)
+        v = root->semAddBlock();
     blokSostOper();
-    //sc->printNum();
-    //printf("Найден блок\n");
     t = sc->scanner(lex);
     if (t != TRightFigSkob)
         sc->printError("Ожидался символ }", lex);
     //--- Назад ---//
-    root->setCur(v);
+    if (flagInterpret) {
+        //printf("До удаления блока:\n");
+        //outTree(true);
+        //root->setCur(v);
+        // --- Удаление блока ---//
+        root->setCur(v->delBlock(false));
+        // --- Конец удаления блока ---//
+        //printf("//////////////////\nДерево после удаления блока ");
+        //sc->printNum();
+        //printf("\n");
+        //outTree(true);
+    }
 }
 
 void Diagram::blokSostOper() {
@@ -235,43 +228,85 @@ void Diagram::oper() {
         if(t == TTZpt) {
             //Пустой оператор
             return;
-        }
-        else
-            sc ->printError("Ожидался символ ;",lex);
+        } else
+            sc->printError("Ожидался символ ;", lex);
     }
-    if(t == TTZpt){
+    if (t == TTZpt) {
         //Пустой оператор
         return;
     }
-    if(t == TFor){
+    int forCondition, forStepExpression, startBlockFor, endFor;
+    //Для запоминания строки и позиции в ней, шобы потом восстановить
+    int forConditionStr, forConditionPos, forStepExpressionStr, forStepExpressionPos, startBlockForStr, startBlockForPos, endForStr, endForPos;
+    if (t == TFor) {
         t = sc->scanner(lex);
-        Node res;
+        Node *res = new Node();
         if (t != TLeftRoundSkob)
             sc->printError("ожидался символ (", lex);
         assign();
         t = sc->scanner(lex);
         if (t != TTZpt)
             sc->printError("ожидался символ ;", lex);
-        expression1(&res);
+
+        //Запоминмаем, чтобы потом восстановить
+        bool localFlag = flagInterpret;
+        //Выполняем условие для входа в цикл и проверям его
+        sc->getUK(forCondition, forConditionStr, forConditionPos);
+        expression1(res);
+        sem91();
+        checkCondition(res);
+
+        //3 выражение
         t = sc->scanner(lex);
         if (t != TTZpt)
             sc->printError("ожидался символ ;", lex);
-        //TODO: Присваивание или выр1 ?
-        expression1(&res);
+        sc->getUK(forStepExpression, forStepExpressionStr, forStepExpressionPos);
+        //не интерпретируем в 1 проход цикла
+        bool memFlag = flagInterpret;
+        flagInterpret = false;
+        expression1(res);
+        sem91();
+        //восстанавливаем результат условия цикла
+        flagInterpret = memFlag;
         t = sc->scanner(lex);
         if (t != TRightRoundSkob)
             sc->printError("ожидался символ )", lex);
+        //Начало блока for
+        sc->getUK(startBlockFor, startBlockForStr, startBlockForPos);
+        startBlock:
         oper();
+        sc->getUK(endFor, endForStr, endForPos);
+        //3 выражение в for
+        sc->setUK(forStepExpression, forStepExpressionStr, forStepExpressionPos);
+
+        expression1(res);
+        sem91();
+
+        delete res;
+        res = new Node;
+        //2 выражение в for
+        sc->setUK(forCondition, forConditionStr, forConditionPos);
+        expression1(res);
+        sem91();
+        checkCondition(res);
+        if (flagInterpret) {
+            sc->setUK(startBlockFor, startBlockForStr, startBlockForPos);
+            goto startBlock;
+        } else {
+            flagInterpret = localFlag;
+            sc->setUK(endFor, endForStr, endForPos);
+        }
         return;
     }
     if (t == TLeftFigSkob) {
         sc->setUK(tmpUk);
-        sostOper();
+        sostOper(nullptr);
         return;
     }
     if (t == TReturn) {
         Node res2;
         expression1(&res2);
+        sem91();
         t = sc->scanner(lex);
         if (t != TTZpt)
             sc->printError("Ожидался символ ;", lex);
@@ -280,16 +315,21 @@ void Diagram::oper() {
         //--- end СЕМ 5 ---//
         return;
     }
-    sc -> printError("Ожидался оператор",lex);
+    sc->printError("Ожидался оператор", lex);
+}
+
+void Diagram::checkCondition(Node *res) {
+    if (flagInterpret && (res->dataValue.int32Data != 0)) flagInterpret = 1;
+    else flagInterpret = 0;
 }
 
 void Diagram::expression1(Node *res) {
     TypeLex lex;
-    int t;
+    int t, uno;
     int tmpUk;
     tmpUk = sc->getUK();
-    t = sc->scanner(lex);
-    if (t == TPlus || t == TMinus) {
+    uno = sc->scanner(lex);
+    if (uno == TPlus || uno == TMinus) {
         //унарный + -
     } else
         sc->setUK(tmpUk);
@@ -300,12 +340,19 @@ void Diagram::expression1(Node *res) {
     while (t == TNEQ || t == TEQ) {
         expression2(&res1);
         //--- СЕМ 8 ---//
-        sem8Compare(res);
+        sem8Compare(res, &res1, t);
         //--- end СЕМ 8 ---//
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
     sc->setUK(tmpUk);
+    if (uno == TMinus) {
+        if (res->typeData == TDataInt)
+            res->dataValue.int32Data *= -1;
+        else
+            res->dataValue.int64Data *= -1;
+    }
+
 }
 
 void Diagram::expression2(Node *res) {
@@ -319,7 +366,7 @@ void Diagram::expression2(Node *res) {
     while (t == TGE || t == TGT || t == TLE || t == TLT) {
         expression3(&res1);
         // -- СЕМ 8 -- //
-        sem8Compare(res);
+        sem8Compare(res, &res1, t);
         // --  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
@@ -338,7 +385,7 @@ void Diagram::expression3(Node *res) {
     while (t == TPlus || t == TMinus) {
         expression4(&res1);
         // -- СЕМ 8 -- //
-        sem8(res, &res1);
+        sem8(res, &res1, t);
         //--  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
@@ -357,7 +404,7 @@ void Diagram::expression4(Node *res) {
     while (t == TMul || t == TDiv || t == TMod) {
         expression5(&res1);
         // -- СЕМ 8 -- //
-        sem8(res, &res1);
+        sem8(res, &res1, t);
         //--  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
@@ -365,9 +412,10 @@ void Diagram::expression4(Node *res) {
     sc->setUK(tmpUk);
 }
 
+//TODO ++ и -- работают через жопу
 void Diagram::expression5(Node *res) {
     TypeLex lex;
-    int t;
+    int t, prefT;
     int tmpUk;
     tmpUk = sc->getUK();
     t = sc->scanner(lex);
@@ -375,22 +423,23 @@ void Diagram::expression5(Node *res) {
     if (t == TAddSelf || t == TSubSelf) {
         isPref = true;
         // -- СЕМ 9 -- //
-        sem9(res);
+        //sem9(res, t);
         //--  end СЕМ 9 -- //
     } else
         sc->setUK(tmpUk);
     expression6(res);
-    if(!isPref) {
+    if (!isPref) {
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
         if (t == TAddSelf || t == TSubSelf) {
-            // -- СЕМ 9 -- //
-            sem9(res);
-            //--  end СЕМ 9 -- //
+            //postfixOper.push_back(std::make_pair(res, t));
+            sem9(res, t);
             return;
-        } else
+        } else {
             sc->setUK(tmpUk);
-    }
+        }
+    } else
+        sem9(res, t);
 }
 
 void Diagram::expression6(Node *res) {
@@ -448,9 +497,86 @@ void Diagram::expression6(Node *res) {
     }
 }
 
+//Сем1 - проверка на существование описания функции. Если ранее не описывалась, добавляем в таблицу. Иначе – ошибка
+void Diagram::sem1(char *_id, int typeData) {
+    if (!flagInterpret)
+        return;
+    //--- СЕМ 1 ---//
+    Tree *v = root->semAddNode(_id, TNodeFunction, typeData, sc);
+    v->getNode()->startFunction = sc->getUK();
+    //sc->printNum();
+    //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(TNodeFunction), TDataToName(typeData));
+    root->setCur(v);
+    //--- end СЕМ 1 ---//
+}
+
+
+void Diagram::sem3(char *lex, int typeData) {
+    if (!flagInterpret)
+        return;
+    // --- СЕМ 3 ---//
+    Tree *v = root->semAddNode(lex, TNodeVar, typeData, sc);
+    //sc->printNum();
+    //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(TNodeVar), TDataToName(typeData));
+    //--- end СЕМ 3 ---//
+}
+
+void Diagram::sem4(Node *var, Node resExpress) {
+    if (!flagInterpret)
+        return;
+    int type1 = var->typeData;
+    int type2 = resExpress.typeData;
+    if (type1 < type2)
+        sc->printWarningTypes(type1, type2, WSmallType);
+    //if (type1 > type2)
+    //    sc->printWarningTypes(type2, type1, WPrivedenie);
+    var->init = true;
+
+    //Тут будет присваивание
+    switch (var->typeData) {
+        case TDataLong:
+        case TDataInt:
+            switch (resExpress.typeData) {
+                case TDataInt:
+                    var->dataValue.int32Data = resExpress.dataValue.int32Data;
+                    break;
+                case TDataLongLong:
+                    var->dataValue.int32Data = resExpress.dataValue.int64Data;
+                    break;
+                default:
+                    printf("Ошибка в сем4: тип результата неизвестный = %d\n", resExpress.typeData);
+            }
+            break;
+        case TDataLongLong:
+            switch (resExpress.typeData) {
+                case TDataInt:
+                    var->dataValue.int64Data = resExpress.dataValue.int32Data;
+                    break;
+                case TDataLongLong:
+                    var->dataValue.int64Data = resExpress.dataValue.int64Data;
+                    break;
+                default:
+                    printf("Ошибка в сем4: тип результата неизвестный = %d\n", resExpress.typeData);
+            }
+            break;
+        default:
+            printf("Ошибка в сем4: тип переменной неизвестный = %d\n", resExpress.typeData);
+    }
+
+    //Вывод нового значения
+    sc->printNum();
+    printf("%s %s = ", TDataToName(var->typeData).c_str(), var->id);
+    if (var->typeData == TDataInt)
+        printf("%d\n", var->dataValue.int32Data);
+    else
+        printf("%lld\n", var->dataValue.int64Data);
+}
+
+
 // Сем5 – проверка на соответствие типа, возвращаемого функцией и типа выражения 1.
 void Diagram::sem5(Node *resExpression1) {
-
+    if (!flagInterpret)
+        return;
     int type1 = resExpression1->typeData;
     Node *func = root->findUp(TNodeFunction)->getNode();
     int type2 = func->typeData;
@@ -461,18 +587,483 @@ void Diagram::sem5(Node *resExpression1) {
 
 }
 
-void Diagram::sem8Compare(Node *res) {
-    if (res)
-        res->typeData = TDataInt;
+void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
+    if (!flagInterpret)
+        return;
+    int type1 = res->typeData;
+    int type2 = res1->typeData;
+
+    if (type1 == TDataUndefined || type2 == TDataUndefined) {
+        res->typeData = TDataUndefined;
+    } else {
+        /*
+        if (type1 < type2) {
+            sc->printWarningTypes(type1, type2, WPrivedenie);
+            res->typeData = type2;
+        }
+        if (type1 > type2) {
+            sc->printWarningTypes(type2, type1, WPrivedenie);
+            res1->typeData = type1;
+        }
+         */
+        //TODO надо ли?
+        // -- проверка на инициализацию -- //
+        if (!res->init)
+            sc->printWarning(WUndefined, res->id);
+        if (!res1->init)
+            sc->printWarning(WUndefined, res1->id);
+        // -- конец проверки на инициализацию -- //
+    }
+    switch (typeOperation) {
+        case TPlus:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int32Data += res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->typeData = TDataLongLong;
+                            res->dataValue.int64Data = res->dataValue.int32Data;
+                            res->dataValue.int64Data += res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сложение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int64Data += res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->dataValue.int64Data += res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сложение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сложение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TMinus:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int32Data -= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->typeData = TDataLongLong;
+                            res->dataValue.int64Data = res->dataValue.int32Data;
+                            res->dataValue.int64Data -= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 вычитание: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int64Data -= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->dataValue.int64Data -= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 вычитание: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 вычитание: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TDiv:
+            try {
+                switch (res->typeData) {
+                    case TDataLong:
+                    case TDataInt:
+                        switch (res1->typeData) {
+                            case TDataLong:
+                            case TDataInt:
+                                if (res1->dataValue.int32Data == 0)
+                                    throw 1;
+                                res->dataValue.int32Data /= res1->dataValue.int32Data;
+                                break;
+                            case TDataLongLong:
+                                if (res1->dataValue.int64Data == 0)
+                                    throw 1;
+                                res->typeData = TDataLongLong;
+                                res->dataValue.int64Data = res->dataValue.int32Data;
+                                res->dataValue.int64Data /= res1->dataValue.int64Data;
+                                break;
+                            default:
+                                printf("Сем8 DIV: неизвестный тип res1 %d\n", res1->typeData);
+                        }
+                        break;
+                    case TDataLongLong:
+                        switch (res1->typeData) {
+                            case TDataLong:
+                            case TDataInt:
+                                if (res1->dataValue.int32Data == 0)
+                                    throw 1;
+                                res->dataValue.int64Data /= res1->dataValue.int32Data;
+                                break;
+                            case TDataLongLong:
+                                if (res1->dataValue.int64Data == 0)
+                                    throw 1;
+                                res->dataValue.int64Data /= res1->dataValue.int64Data;
+                                break;
+                            default:
+                                printf("Сем8 DIV: неизвестный тип res1 %d\n", res1->typeData);
+                        }
+                        break;
+                    default:
+                        printf("Сем8 DIV: неизвестный тип res %d\n", res->typeData);
+                }
+                break;
+            } catch (int ex) {
+                sc->printError("Деление на ноль невозможно. Переменная ", res1->id, true);
+            }
+        case TMul:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int32Data *= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->typeData = TDataLongLong;
+                            res->dataValue.int64Data = res->dataValue.int32Data;
+                            res->dataValue.int64Data *= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 Mul: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int64Data *= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->dataValue.int64Data *= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 Mul: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 Mul: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TMod:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int32Data %= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->typeData = TDataLongLong;
+                            res->dataValue.int64Data = res->dataValue.int32Data;
+                            res->dataValue.int64Data %= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 MOD: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            res->dataValue.int64Data %= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            res->dataValue.int64Data %= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 MOD: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 MOD: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        default:
+            printf("Сем8 MOD: неизвестный тип операции %d\n", typeOperation);
+    }
+}
+
+void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
+    if (!flagInterpret)
+        return;
+    int result;
+    switch (typeOperation) {
+        case TEQ:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int32Data == res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int32Data == res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int64Data == res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int64Data == res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сравнение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TNEQ:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int32Data != res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int32Data != res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int64Data != res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int64Data != res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сравнение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TGE:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int32Data >= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int32Data >= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int64Data >= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int64Data >= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сравнение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TGT:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int32Data > res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int32Data > res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int64Data > res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int64Data > res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сравнение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TLE:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int32Data <= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int32Data <= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int64Data <= res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int64Data <= res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сравнение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TLT:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int32Data < res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int32Data < res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                case TDataLongLong:
+                    switch (res1->typeData) {
+                        case TDataLong:
+                        case TDataInt:
+                            result = res->dataValue.int64Data < res1->dataValue.int32Data;
+                            break;
+                        case TDataLongLong:
+                            result = res->dataValue.int64Data < res1->dataValue.int64Data;
+                            break;
+                        default:
+                            printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
+                    }
+                    break;
+                default:
+                    printf("Сем8 сравнение: неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        default:
+            printf("Сем8 сравнение: неизвестный тип операции %d\n", typeOperation);
+    }
+
+    res->typeData = TDataInt;
+    //res->typeNode = TNodeVar;
+    res->dataValue.int32Data = result;
 }
 
 // Если константа, выполнить ++ или - - нельзя.
-void Diagram::sem9(Node *res) {
+void Diagram::sem9(Node *res, int typeOperation) {
+    if (!flagInterpret)
+        return;
     if (res->typeNode == TNodeConst)
         sc->printError("Попытка применить операторы ++ или -- к константе");
+    switch (typeOperation) {
+        case TAddSelf:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    //TODO Обрати внимание
+                    root->semGetVar(res->id, sc)->getNode()->dataValue.int32Data++;
+                    res->dataValue.int32Data++;
+                    break;
+                case TDataLongLong:
+                    root->semGetVar(res->id, sc)->getNode()->dataValue.int64Data++;
+                    res->dataValue.int64Data++;
+                    break;
+                default:
+                    sc->printNum();
+                    printf("Ошибка при выполнении ++ или --. Сем9 : неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        case TSubSelf:
+            switch (res->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    res->dataValue.int32Data--;
+                    break;
+                case TDataLongLong:
+                    res->dataValue.int64Data--;
+                    break;
+                default:
+                    printf("Ошибка при выполнении ++ или --. Сем9 : неизвестный тип res %d\n", res->typeData);
+            }
+            break;
+        default:
+            printf("Ошибка при выполнении ++ или --. Сем9 : неизвестный тип операции %d\n", typeOperation);
+    }
 }
 
 void Diagram::sem10(Node *res, TypeLex nameFunc) {
+    if (!flagInterpret)
+        return;
     Tree *v = root->semGetFunc(nameFunc, sc);
     if (v == nullptr) {
         res = new Node(TNodeFunction);
@@ -482,48 +1073,59 @@ void Diagram::sem10(Node *res, TypeLex nameFunc) {
     }
 }
 
-
-void Diagram::sem11(Node *res, TypeLex nameVar) {
+//Сем11 - Проверка на существование переменной ранее в блоке. Если нет такой - ошибка. Если есть, возвращаем её значение.
+Tree *Diagram::sem11(Node *res, TypeLex nameVar) {
+    if (!flagInterpret)
+        return nullptr;
     Tree *v = root->semGetVar(nameVar, sc);
-    if (v == nullptr)
-        res = new Node(TNodeVar);
-    else {
+    if (v == nullptr) {
+        //printf("Сюда зайти мы не должны\n");
+        return nullptr;
+    } else {
         res->typeNode = TNodeVar;
         res->typeData = v->getNode()->typeData;
         res->init = v->getNode()->init;
         strcpy(res->id, v->getNode()->id);
+        res->dataValue = v->getNode()->dataValue;
     }
+    return v;
 }
 
 // Вернуть тип константы (int, long, long long, short)
 void Diagram::sem12(Node *res, TypeLex lexConst, int typeConst) {
-    bool isShort = res->typeData == TDataShort;
-    res->typeData = sc->getTypeConst(lexConst, typeConst, isShort);
+    if (!flagInterpret)
+        return;
+    long long constanta = (typeConst == TConst10) ? strtoull(lexConst, nullptr, 10) : strtoull(lexConst, nullptr, 16);
+    res->typeData = sc->getTypeConst(constanta, typeConst);
     res->typeNode = TNodeConst;
     res->init = true;
+    if (res->typeData == TDataInt)
+        res->dataValue.int32Data = constanta;
+    else
+        res->dataValue.int64Data = constanta;
 }
 
-void Diagram::sem8(Node *res1, Node *res2) {
-    int type1 = res1->typeData;
-    int type2 = res2->typeData;
 
-    if (type1 == TDataUndefined || type2 == TDataUndefined) {
-        res1->typeData = TDataUndefined;
-    } else {
-        if (type1 < type2) {
-            sc->printWarningTypes(type1, type2, WPrivedenie);
-            res1->typeData = type2;
-        }
-        if (type1 > type2) {
-            sc->printWarningTypes(type2, type1, WPrivedenie);
-            res2->typeData = type1;
-        }
-        // -- проверка на инициализацию -- //
-        if (!res1->init)
-            sc->printWarning(WUndefined, res1->id);
-        if (!res2->init)
-            sc->printWarning(WUndefined, res2->id);
-        // -- конец проверки на инициализацию -- //
+void Diagram::outTree(bool printEmpty) {
+    root->printTree();
+}
+
+bool Diagram::isFlagInterpret() {
+    return flagInterpret;
+}
+
+void Diagram::setFlagInterpret(bool flagInterpret) {
+    Diagram::flagInterpret = flagInterpret;
+}
+
+
+//Выполнение постфиксных ++ или --
+void Diagram::sem91() {
+    //Забить
+    return;
+    if (!postfixOper.empty()) {
+        for (int i = 0; i < postfixOper.size(); i++)
+            sem9(postfixOper[i].first, postfixOper[i].second);
+        postfixOper.clear();
     }
-
 }

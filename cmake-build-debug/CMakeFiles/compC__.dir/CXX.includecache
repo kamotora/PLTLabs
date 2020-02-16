@@ -6,15 +6,19 @@
 
 #IncludeRegexTransform: 
 
-/home/artem/compC++/Scanner.cpp
-Scanner.h
-/home/artem/compC++/Scanner.h
-cstring
--
-
 /home/artem/compC++/Scanner.h
 defs.h
 /home/artem/compC++/defs.h
+
+/home/artem/compC++/Tree.cpp
+Tree.h
+/home/artem/compC++/Tree.h
+
+/home/artem/compC++/Tree.h
+defs.h
+/home/artem/compC++/defs.h
+Scanner.h
+/home/artem/compC++/Scanner.h
 
 /home/artem/compC++/defs.h
 iostream

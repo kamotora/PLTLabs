@@ -42,7 +42,8 @@ int LL1::LL_1() {
                     z--; // стираем верхушку магазина
                 }
             } else {
-                sc->printError("неверный символ, ожидался", lex);
+                string str = "неверный символ, ожидался " + codeToString(magazin[z]);
+                sc->printError(str, lex);
                 return -1;
             }
         } else {
@@ -94,7 +95,7 @@ int LL1::LL_1() {
                     } else if (t == TInt) {
                         magazin[z++] = netermType3;
                     } else
-                        sc->printError("Неверный символ", lex);
+                        sc->printError("Неверный символ, ожидался short,int,long", lex);
                     break;
                 case netermType2:
                     if (t == TLong) {
@@ -265,7 +266,7 @@ int LL1::LL_1() {
                 case netermExpr51:
                     if (!expression51(t, lex))
                         //sc->printError("Неверный символ. Ожидались *,/,% +,-, ==, !=, <=,<,>,>=, ),; ",lex);
-                        sc->printError("Неверный символ. Ожидались ++,--, ),; ", lex);
+                        sc->printError("Неверный символ. Ожидались арифметические и операции сравнения ", lex);
                     break;
                 case netermExpr6:
                     if (t == TIdent) {
@@ -280,7 +281,7 @@ int LL1::LL_1() {
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TLeftRoundSkob;
                     } else
-                        sc->printError("Неверный символ. Ожидались идентификатор, константа, )", lex);
+                        sc->printError("Неверный символ. Ожидались идентификатор, константа, (", lex);
                     break;
                 case netermFuncCallOrVar:
                     if (t == TLeftRoundSkob) {
@@ -404,3 +405,187 @@ void LL1::getCurrents(int t, TypeLex lex) {
 bool LL1::isTerminal(int t) {
     return t < netermProgram && t >= 0;
 }
+
+string LL1::codeToString(int code) {
+    string str;
+
+    switch (code) {
+        case netermProgram:
+            str = "нетерминал программа";
+            break;
+        case netermDescription:
+            str = "нетерминал Описание";
+            break;
+        case netermData:
+            str = "нетерминал данные";
+            break;
+        case netermType:
+            str = "нетерминал тип";
+            break;
+        case netermType2:
+            str = "нетерминал тип";
+            break;
+        case netermType3:
+            str = "нетерминал тип";
+            break;
+        case netermList:
+            str = "нетерминал список";
+            break;
+        case netermList2:
+            str = "нетерминал список2";
+            break;
+        case netermAssign:
+            str = "нетерминал присваивание";
+            break;
+        case netermAssign2:
+            str = "нетерминал присваивание2";
+            break;
+        case netermSostOper:
+            str = "нетерминал составной оператор";
+            break;
+        case netermBlockSostOper:
+            str = "нетерминал блок составного оператора";
+            break;
+        case netermOper:
+            str = "нетерминал оператор";
+            break;
+
+        case netermExpr1:
+            str = "нетерминал выражение1";
+            break;
+        case netermExpr11:
+            str = "нетерминал выражение1.1";
+            break;
+        case netermExpr2:
+            str = "нетерминал выражение2";
+            break;
+        case netermExpr21:
+            str = "нетерминал выражение2.1";
+            break;
+        case netermExpr3:
+            str = "нетерминал выражение3";
+            break;
+        case netermExpr31:
+            str = "нетерминал выражение3.1";
+            break;
+        case netermExpr4:
+            str = "нетерминал выражение4";
+            break;
+        case netermExpr41:
+            str = "нетерминал выражение4.1";
+            break;
+        case netermExpr5:
+            str = "нетерминал выражение5";
+            break;
+        case netermExpr51:
+            str = "нетерминал выражение5.1";
+            break;
+        case netermExpr6:
+            str = "нетерминал выражение6";
+            break;
+
+        case netermFuncCallOrVar:
+            str = "нетерминмал вызов ф-ии или переменная";
+            break;
+
+        case TIdent:
+            str = "идентификатор";
+            break;
+        case TConst10:
+            str = "константа 10сс";
+            break;
+        case TConst16:
+            str = "константа 16сс";
+            break;
+
+        case TReturn:
+            str = "return";
+            break;
+        case TFor:
+            str = "for";
+            break;
+        case TInt:
+            str = "int";
+            break;
+        case TShort:
+            str = "short";
+            break;
+        case TLong:
+            str = "long";
+            break;
+        case TPlus:
+            str = "+";
+            break;
+        case TMinus:
+            str = "-";
+            break;
+        case TMul:
+            str = "*";
+            break;
+        case TDiv:
+            str = "/";
+            break;
+        case TMod:
+            str = "%";
+            break;
+        case TSave:
+            str = "=";
+            break;
+        case TAddSelf:
+            str = "++";
+            break;
+        case TSubSelf:
+            str = "--";
+            break;
+        case TGT:
+            str = ">";
+            break;
+        case TLT:
+            str = "<";
+            break;
+        case TGE:
+            str = ">=";
+            break;
+        case TLE:
+            str = "<=";
+            break;
+        case TEQ:
+            str = "==";
+            break;
+        case TNEQ:
+            str = "!=";
+            break;
+
+        case TLeftRoundSkob:
+            str = "(";
+            break;
+        case TRightRoundSkob:
+            str = ")";
+            break;
+        case TLeftFigSkob:
+            str = "{";
+            break;
+        case TRightFigSkob:
+            str = "}";
+            break;
+        case TTZpt:
+            str = ";";
+            break;
+        case TZpt:
+            str = ",";
+            break;
+
+        case TErr:
+            str = "TError";
+            break;
+        case TEnd:
+            str = "TEnd";
+            break;
+
+        default:
+            str = "^_^";
+    }
+
+    return str;
+}
+

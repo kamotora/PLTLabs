@@ -18,14 +18,10 @@
 
 // Максимальное количество ключевых слов
 #define MAX_NUM_KEY_WORD 5
-const char MAX_SHORT_10[] = {'3', '2', '7', '6', '7', '\0'};
-const char MAX_SHORT_16[] = {'f', 'f', '\0'};
 
-const char MAX_INT_10[] = {"2147483647\0"};
-const char MAX_INT_16[] = {'f', 'f', 'f', 'f', '\0'};
+#define SIZE_MAX_LONGLONG_10 19
 
-const char MAX_LONGLONG_10[] = {"9223372036854775807\0"};
-const char MAX_LONGLONG_16[] = {'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', '\0'};
+#define SIZE_MAX_LONGLONG_16 8
 //Ключевые слова
 #define TFor 1
 #define TReturn 2

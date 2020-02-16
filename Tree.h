@@ -9,10 +9,8 @@
 #include "Scanner.h"
 
 union DataValue {
-    short dataAsShort;
-    int dataAsInt;
-    long dataAsLong;
-    long long dataAsLongLong;
+    int int32Data;
+    long long int64Data;
 };
 
 struct Node {
@@ -22,20 +20,22 @@ struct Node {
     TypeLex id;
     // тип (int,short, long, long long)
     int typeData;
-    //DataValue dataValue; // значение
+    DataValue dataValue; // значение
     bool init;
-
+    int startFunction;
 
     Node() {
         typeNode = TNodeEmpty;
         typeData = TDataUndefined;
         init = false;
+        strcpy(id, "###");
     }
 
     Node(int _typeNode) {
         typeNode = _typeNode;
         typeData = TDataUndefined;
         init = false;
+        strcpy(id, "###");
     }
 
     Node(int _typeNode, TypeLex _id, int _typeData) {
@@ -110,6 +110,12 @@ public:
     Node *getNode() const;
 
     Tree *findUp(int typeNode);
+
+    void delTree();
+
+    Tree *delBlock(bool needDeleteFunctions);
+
+
 };
 
 

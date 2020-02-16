@@ -1,47 +1,58 @@
-int a = 0xBA, d;
-long long fun() {
-    int a = 0xBA, d;
-    long long b = fun();
-    short g = 0xA,i = 3,j;
-    {}{}{}{{{;}{{a = a*a;}}}{}};;;;;
-    //int a = 0xBA, d;
-    a = (a + b - ( d / ( g - (i * j)) ) );
-    {int a = 1;}
-    return a;
+int fun(){
+    int fun_a = 5;
+    return fun_a;
 }
 
-int fun2(){
-    return a + d;
-}
-
-int cc = a - fun();
+int globalInt = 33;
 
 int main() {
-    int a = 1, d = 0xBA, c = +3;
-    //int a = 3;
+    int a = 186, d = 0xBA;
+    long long c = -0xBA;
+    //int32 10cc
+    a = a * 100000 * 100000 * 100000;
+    //int32 16cc
+    d = d * 100000 * 100000 * 100000;
+    //int64 16cc
+    c = c * (-1) * 100000 * 100000 * 100000;
+    int e = c;
     long long int q;
     q = 1;
-    short b = +9;
-    a = ++fun();
-    //int a = ++fun2();
-    int l;
-    int i = 0;
-    for(i = 0; i < 0xFF; i++){
+    int b = -9;
+    long long cc = 0xFFF;
+    int l = 1;
+    //int l = 5++;
+    l = ++l * cc + (5 / (++b)) + globalInt;
+    b = b;
+    l = l;
+    int var = -0xABC;
+    {
         long i = 444444;
-        for(i = 0; i <= 0xFF; i++){
+        {
             int test = 3;
-            a = (3 + cc * 2 * var) % 0xF * test / (((l)))*l;
-            for(i = 0; i >= 0xFF; i++){
-                a = 3 != (--cc > 2 + (a + (a * (a / a)++))) == (l++) + (0xF < a) * test % l;
+
+            a = (((l)))*l / (3 + cc * 2 * var) % 0xF * test;
+            {
+                a = - (a + (a * ((a * test) * a ))) ;
             }
         }
         //a = test + 3;
-        for(i = 0; i >= 0xFF; i++){
+        {
             int test = 4;
             a = (3 + cc * 2) % 0xF * test / l;
-            return a;
         }
-        return b;
+    }
+    int testFor = 1;
+    int i;
+    //for(i = 0; i < 10; i++)
+    {
+        testFor = testFor + i;
+        i = i;
+        int j;
+        //for(j = 0; j < 10; j++)
+        {
+            testFor = testFor + j;
+            j = j;
+        }
     }
     return q;
 }

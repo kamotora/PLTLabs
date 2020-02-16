@@ -6,6 +6,7 @@
 //#include "Scanner.cpp"
 //#include "Diagram.cpp"
 //#include "Tree.cpp"
+//#include "LL1.cpp"
 //#include "defs.cpp"
 
 using namespace std;
@@ -25,21 +26,20 @@ int main(int argc, char *argv[]) {
         printf("%s - тип %d \n",l, type);
     } while(type!=TEnd);
     */
-
-    /*
     Diagram *diagram = new Diagram(sc);
+    diagram->setFlagInterpret(true);
     diagram->prog();
-     */
-
+    /*
     LL1 *anazyle = new LL1(sc);
     anazyle->LL_1();
     int type;
     TypeLex lex;
     type = sc->scanner(lex);
+
     if (type == TEnd)
         printf("Синтаксических ошибок не обнаружено. \n");
     else
         sc->printError("Лишний текст в конце программы.");
-
+     */
     return 0;
 }
