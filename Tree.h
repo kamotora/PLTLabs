@@ -13,6 +13,26 @@ union DataValue {
     long long int64Data;
 };
 
+struct Position {
+    int uk;
+    int line;
+    int pos;
+
+    Position() {}
+
+    Position(int _uk, int _line, int _pos) {
+        uk = _uk;
+        line = _line;
+        pos = _pos;
+    }
+
+    void getValues(int &_uk, int &_line, int &_pos) {
+        _uk = uk;
+        _line = line;
+        _pos = pos;
+    }
+};
+
 struct Node {
 
     // пустой, переменная, функция
@@ -21,14 +41,14 @@ struct Node {
     // тип (int,short, long, long long)
     int typeData;
     DataValue dataValue; // значение
+    Position funcPosition;
     bool init;
-    int startFunction;
-
     Node() {
         typeNode = TNodeEmpty;
         typeData = TDataUndefined;
         init = false;
         strcpy(id, "###");
+        funcPosition = Position();
     }
 
     Node(int _typeNode) {
@@ -36,6 +56,7 @@ struct Node {
         typeData = TDataUndefined;
         init = false;
         strcpy(id, "###");
+        funcPosition = Position();
     }
 
     Node(int _typeNode, TypeLex _id, int _typeData) {
@@ -43,6 +64,7 @@ struct Node {
         typeData = _typeData;
         init = false;
         memcpy(id, _id, strlen(_id) + 1);
+        funcPosition = Position();
     }
 };
 

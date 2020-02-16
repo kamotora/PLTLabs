@@ -38,7 +38,7 @@ public:
     void assign();
 
     //Составной оператор
-    void sostOper(Node *pNode);
+    void sostOper();
 
     //Блок составного оператора
     void blokSostOper();
@@ -79,7 +79,7 @@ public:
 
     void sem5(Node *res);
 
-    void outTree(bool);
+    void outTree();
 
     void sem1();
 
@@ -96,6 +96,8 @@ public:
     void sem91();
 
     void checkCondition(Node *res);
+
+    void sem4(Node *var, Node *resExpress);
 };
 
 

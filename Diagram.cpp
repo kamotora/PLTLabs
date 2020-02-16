@@ -3,6 +3,7 @@
 //
 
 #include "Diagram.h"
+#include "Tree.h"
 
 bool Diagram::flagInterpret = true;
 
@@ -62,13 +63,12 @@ void Diagram::description() {
         bool isMain = strcmp(_id, "main") == 0;
         if (!isMain)
             flagInterpret = false;
-        Node *res = new Node;
-        sostOper(res);
+        sostOper();
         if (!isMain)
             flagInterpret = true;
     }
     else{
-      data();
+        data();
     }
 
 }
@@ -169,7 +169,7 @@ void Diagram::assign() {
 }
 
 
-void Diagram::sostOper(Node *pNode) {
+void Diagram::sostOper() {
     TypeLex lex;
     int t;
     t = sc->scanner(lex);
@@ -186,7 +186,7 @@ void Diagram::sostOper(Node *pNode) {
     //--- Назад ---//
     if (flagInterpret) {
         //printf("До удаления блока:\n");
-        //outTree(true);
+        //outTree();
         //root->setCur(v);
         // --- Удаление блока ---//
         root->setCur(v->delBlock(false));
@@ -194,7 +194,7 @@ void Diagram::sostOper(Node *pNode) {
         //printf("//////////////////\nДерево после удаления блока ");
         //sc->printNum();
         //printf("\n");
-        //outTree(true);
+        //outTree();
     }
 }
 
@@ -300,7 +300,7 @@ void Diagram::oper() {
     }
     if (t == TLeftFigSkob) {
         sc->setUK(tmpUk);
-        sostOper(nullptr);
+        sostOper();
         return;
     }
     if (t == TReturn) {
@@ -415,7 +415,7 @@ void Diagram::expression4(Node *res) {
 //TODO ++ и -- работают через жопу
 void Diagram::expression5(Node *res) {
     TypeLex lex;
-    int t, prefT;
+    int t;
     int tmpUk;
     tmpUk = sc->getUK();
     t = sc->scanner(lex);
@@ -503,7 +503,9 @@ void Diagram::sem1(char *_id, int typeData) {
         return;
     //--- СЕМ 1 ---//
     Tree *v = root->semAddNode(_id, TNodeFunction, typeData, sc);
-    v->getNode()->startFunction = sc->getUK();
+    int startFuncUk, startFuncLine, startFuncPos;
+    sc->getUK(startFuncUk, startFuncLine, startFuncPos);
+    v->getNode()->funcPosition = Position(startFuncUk, startFuncLine, startFuncPos);
     //sc->printNum();
     //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(TNodeFunction), TDataToName(typeData));
     root->setCur(v);
@@ -573,18 +575,48 @@ void Diagram::sem4(Node *var, Node resExpress) {
 }
 
 
-// Сем5 – проверка на соответствие типа, возвращаемого функцией и типа выражения 1.
+// Сем5
+// Проверка на соответствие типа, возвращаемого функцией и типа выражения 1
+// Сохранения значения, возвращаемого функцией
 void Diagram::sem5(Node *resExpression1) {
     if (!flagInterpret)
         return;
-    int type1 = resExpression1->typeData;
     Node *func = root->findUp(TNodeFunction)->getNode();
-    int type2 = func->typeData;
-    if (type1 != type2) {
-        sc->printWarningTypes(type2, type1, WDifferentTypesFunc);
-    }
+
     func->init = true;
 
+    switch (func->typeData) {
+        case TDataLong:
+        case TDataInt:
+            switch (resExpression1->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    func->dataValue.int32Data = resExpression1->dataValue.int32Data;
+                    break;
+                case TDataLongLong:
+                    sc->printWarningTypes(TDataInt, TDataLongLong, WDifferentTypesFunc);
+                    func->dataValue.int32Data = resExpression1->dataValue.int64Data;
+                    break;
+                default:
+                    printf("Ошибка в сем5: тип результата неизвестный = %d\n", resExpression1->typeData);
+            }
+            break;
+        case TDataLongLong:
+            switch (resExpression1->typeData) {
+                case TDataLong:
+                case TDataInt:
+                    func->dataValue.int64Data = resExpression1->dataValue.int32Data;
+                    break;
+                case TDataLongLong:
+                    func->dataValue.int64Data = resExpression1->dataValue.int64Data;
+                    break;
+                default:
+                    printf("Ошибка в сем5: тип результата неизвестный = %d\n", resExpression1->typeData);
+            }
+            break;
+        default:
+            printf("Ошибка в сем5: тип функции неизвестный = %d\n", func->typeData);
+    }
 }
 
 void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
@@ -810,7 +842,7 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
 void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
     if (!flagInterpret)
         return;
-    int result;
+    int result = 0;
     switch (typeOperation) {
         case TEQ:
             switch (res->typeData) {
@@ -1071,6 +1103,22 @@ void Diagram::sem10(Node *res, TypeLex nameFunc) {
         res->typeData = v->getNode()->typeData;
         res->init = v->getNode()->init;
     }
+    //Сохраняем текущую позицию по коду
+    int saveUk, savePos, saveLine;
+    sc->getUK(saveUk, saveLine, savePos);
+    //Ставим позицию на начало блока функции
+    int funcUk, funcPos, funcLine;
+    v->getNode()->funcPosition.getValues(funcUk, funcLine, funcPos);
+    sc->setUK(funcUk, funcLine, funcPos);
+    //Запоминаем текущий указатель в дереве
+    Tree *memCur = root->getCur();
+    //Ставим указатель на функцию
+    root->setCur(v);
+    sostOper();
+    //Восстанавливаем указатель
+    root->setCur(memCur);
+    sc->setUK(saveUk, saveLine, savePos);
+    res->dataValue = v->getNode()->dataValue;
 }
 
 //Сем11 - Проверка на существование переменной ранее в блоке. Если нет такой - ошибка. Если есть, возвращаем её значение.
@@ -1106,7 +1154,7 @@ void Diagram::sem12(Node *res, TypeLex lexConst, int typeConst) {
 }
 
 
-void Diagram::outTree(bool printEmpty) {
+void Diagram::outTree() {
     root->printTree();
 }
 
