@@ -12,8 +12,6 @@
 union DataValue {
     int int32Data;
     long long int64Data;
-
-    ~DataValue() {}
 };
 
 struct Position {
@@ -29,8 +27,6 @@ struct Position {
         pos = _pos;
     }
 
-    ~Position() {};
-
     void getValues(int &_uk, int &_line, int &_pos) {
         _uk = uk;
         _line = line;
@@ -38,8 +34,8 @@ struct Position {
     }
 };
 
-struct Node {
-
+class Node {
+public:
     // пустой, переменная, функция
     int typeNode;
     TypeLex id;
@@ -82,7 +78,7 @@ struct Node {
 class Tree {
 private:
     Node *node; // данные таблицы
-    auto *up, *left, *right; // родитель, левый и правый потомок
+    Tree *up, *left, *right; // родитель, левый и правый потомок
 
 public:
     static Tree *cur; // текущий элемент дерева
@@ -154,6 +150,8 @@ public:
 
 
     Tree *delBlock();
+
+    void FreeTree(Tree *tree);
 };
 
 

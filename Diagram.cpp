@@ -191,18 +191,19 @@ void Diagram::sostOper() {
     if (t != TRightFigSkob)
         sc->printError("Ожидался символ }", lex);
     //--- Назад ---//
-    if (flagInterpret || flagReturn) {
-        //printf("До удаления блока:\n");
+    //if (flagInterpret || flagReturn) {
+    //printf("До удаления блока:\n");
         //outTree();
-        //root->setCur(v);
         // --- Удаление блока ---//
         if (v != nullptr) {
+            //printf("До удаления блока:\n");
+            //outTree();
             root->setCur(v->delBlock());
             // --- Конец удаления блока ---//
-            printf("//////////////////\nДерево после удаления блока\n");
-            outTree();
+            //printf("//////////////////\nДерево после удаления блока\n");
+            //outTree();
         }
-    }
+    //}
 }
 
 void Diagram::blokSostOper() {

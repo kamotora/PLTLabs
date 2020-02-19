@@ -11,11 +11,10 @@ int fun(){
 
 int fun1(){
     int i = 0;
-    for(i = 0; i < 10000; i++){
+    for(i = 0; i < 5000000; i++)
+    {
         {
-            {
-                int a, b, c , d , k , l ,m, q, z, x;
-            }
+            int a, b, c , d , k , l ,m, q, z, x;
         }
     }
     return i;

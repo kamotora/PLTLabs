@@ -21,12 +21,11 @@ Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
     up = _up;
     left = _left;
     right = _right;
-    //memcpy(node, _node, sizeof(Node));
     node = _node;
 }
 
 Tree::~Tree() {
-    delete this->node;
+    delete node;
 }
 
 Tree *Tree::getUp() const {
@@ -45,14 +44,14 @@ Tree *Tree::getRight() const {
 void Tree::setLeft(Node *data) {
     if (left != nullptr)
         delete left;
-    left = std::make_unique<Tree>(nullptr, nullptr, this, data);
+    left = new Tree(nullptr, nullptr, this, data);
 }
 
 // создать правого потомка от текущей вершины this
 void Tree::setRight(Node *data) {
-    if (cur->right != nullptr)
+    if (right != nullptr)
         delete right;
-    right = std::make_unique<Tree>(nullptr, nullptr, this, data);
+    right = new Tree(nullptr, nullptr, this, data);
 }
 
 Tree *Tree::findUp(Tree *from, TypeLex id) {
@@ -175,7 +174,7 @@ Tree *Tree::semGetFunc(TypeLex a, Scanner *sc) {
 Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
     if (dupControl(cur, id))
         sc->printError("повторное описание идентификатора", id, false);
-    cur->setLeft(std::make_unique<Node>(typeNode, id, typeData));
+    cur->setLeft(new Node(typeNode, id, typeData));
     cur = cur->left;
     if (typeNode == TNodeFunction) {
         // точка возврата после выхода из функции
@@ -190,8 +189,8 @@ Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
 Tree *Tree::semAddBlock() {
     Tree *v;
     cur->setLeft(new Node(TNodeEmpty));
-    v = cur;
     cur = cur->left;
+    v = cur;
     cur->setRight(new Node(TNodeEmpty));
     cur = cur->right;
     return v;
@@ -203,25 +202,18 @@ Node *Tree::getNode() const {
 }
 
 Tree *Tree::delBlock() {
-    if (this->left != nullptr) {
-        this->left->delTree();
-        this->left = nullptr;
-
-    }
-    if (this->right != nullptr) {
-        this->right->delTree();
-        this->right = nullptr;
-
-    }
-    return this;
+    (up->left == this) ? up->left = nullptr : up->right = nullptr;
+    FreeTree(this);
+    return up;
 }
 
-void Tree::delTree() {
-    if (left != NULL)
-        left->delTree();
-    if (right != NULL)
-        right->delTree();
-    delete this;
+void Tree::FreeTree(Tree *tree) {
+    if (tree == nullptr)
+        return;
+    if (tree->left) FreeTree(tree->left);
+    if (tree->right) FreeTree(tree->right);
+    delete tree;
 }
+
 
 
