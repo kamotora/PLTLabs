@@ -7,10 +7,13 @@
 
 #include "defs.h"
 #include "Scanner.h"
+#include <memory>
 
 union DataValue {
     int int32Data;
     long long int64Data;
+
+    ~DataValue() {}
 };
 
 struct Position {
@@ -26,6 +29,8 @@ struct Position {
         pos = _pos;
     }
 
+    ~Position() {};
+
     void getValues(int &_uk, int &_line, int &_pos) {
         _uk = uk;
         _line = line;
@@ -40,15 +45,22 @@ struct Node {
     TypeLex id;
     // тип (int,short, long, long long)
     int typeData;
-    DataValue dataValue; // значение
-    Position funcPosition;
+    DataValue *dataValue = new DataValue(); // значение
+    Position *funcPosition = nullptr;
     bool init;
+
     Node() {
         typeNode = TNodeEmpty;
         typeData = TDataUndefined;
         init = false;
         strcpy(id, "###");
-        funcPosition = Position();
+    }
+
+    ~Node() {
+        if (this->dataValue != nullptr)
+            delete this->dataValue;
+        if (this->funcPosition != nullptr)
+            delete this->funcPosition;
     }
 
     Node(int _typeNode) {
@@ -56,7 +68,6 @@ struct Node {
         typeData = TDataUndefined;
         init = false;
         strcpy(id, "###");
-        funcPosition = Position();
     }
 
     Node(int _typeNode, TypeLex _id, int _typeData) {
@@ -64,14 +75,14 @@ struct Node {
         typeData = _typeData;
         init = false;
         memcpy(id, _id, strlen(_id) + 1);
-        funcPosition = Position();
+        //funcPosition = new Position();
     }
 };
 
 class Tree {
 private:
     Node *node; // данные таблицы
-    Tree *up, *left, *right; // родитель, левый и правый потомок
+    auto *up, *left, *right; // родитель, левый и правый потомок
 
 public:
     static Tree *cur; // текущий элемент дерева
@@ -80,7 +91,7 @@ public:
 
     Tree();
 
-    ~Tree() {}
+    ~Tree();
 
     //Создать левого потомка от текущей вершины this
     void setLeft(Node *data);
@@ -135,9 +146,14 @@ public:
 
     void delTree();
 
-    Tree *delBlock(bool needDeleteFunctions);
+    Tree *getUp() const;
+
+    Tree *getLeft() const;
+
+    Tree *getRight() const;
 
 
+    Tree *delBlock();
 };
 
 

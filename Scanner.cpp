@@ -378,22 +378,6 @@ void Scanner::getUK(int &get_uk, int &get_line, int &get_pos) {
     get_pos = pos;
 }
 
-int Scanner::getPos() {
-    return pos;
-}
-
-void Scanner::setPos(int _pos) {
-    pos = _pos;
-}
-
-int Scanner::getLine() {
-    return line;
-}
-
-void Scanner::setLine(int _line) {
-    line = _line;
-}
-
 /*
 #define TDataInt 1
 #define TDataShort 2

@@ -2,10 +2,13 @@
 // Created by artem on 16.10.2019.
 //
 
+
 #include "Diagram.h"
 #include "Tree.h"
 
 bool Diagram::flagInterpret = true;
+
+bool Diagram::flagReturn = false;
 
 void Diagram::prog() {
     TypeLex lex;
@@ -61,8 +64,11 @@ void Diagram::description() {
             sc->printError("Ожидался символ )", lex);
         sem1(_id, typeData);
         bool isMain = strcmp(_id, "main") == 0;
-        if (!isMain)
+        if (!isMain) {
             flagInterpret = false;
+        } else {
+            root->setCur(root->getCur()->getRight());
+        }
         sostOper();
         if (!isMain)
             flagInterpret = true;
@@ -88,10 +94,11 @@ void Diagram::data() {
         //Если после идентификатора равно - это присваивание Выражения 1
         if (t == TSave) {
             //--- СЕМ 4 ---//
-            Node res;
-            expression1(&res);
+            Node *res = new Node();
+            expression1(res);
             sem4(root->getCur()->getNode(), res);
             sem91();
+            delete res;
             //--- end СЕМ 4 ---//
         } else
             sc->setUK(tmpUk);
@@ -147,9 +154,9 @@ void Diagram::assign() {
     if (t != TIdent) {
         sc->printError("Ожидался идентификатор", lex);
     }
-    Node res;
+    Node *res = new Node();
     //--- СЕМ 11 особая))---//
-    Tree *v = sem11(&res, lex);
+    Tree *v = sem11(res, lex);
 
     t = sc->scanner(lex);
     if (t != TSave)
@@ -157,7 +164,7 @@ void Diagram::assign() {
 
 
     //--- end СЕМ 11 ---//
-    expression1(&res);
+    expression1(res);
     //--- СЕМ 4 ---//
     if (v != nullptr)
         sem4(v->getNode(), res);
@@ -165,7 +172,7 @@ void Diagram::assign() {
         sem4(nullptr, res); // nullptr - метод не должен работать, флаг = false
     //--- end СЕМ 4 ---//
     sem91();
-
+    delete res;
 }
 
 
@@ -184,17 +191,17 @@ void Diagram::sostOper() {
     if (t != TRightFigSkob)
         sc->printError("Ожидался символ }", lex);
     //--- Назад ---//
-    if (flagInterpret) {
+    if (flagInterpret || flagReturn) {
         //printf("До удаления блока:\n");
         //outTree();
         //root->setCur(v);
         // --- Удаление блока ---//
-        root->setCur(v->delBlock(false));
-        // --- Конец удаления блока ---//
-        //printf("//////////////////\nДерево после удаления блока ");
-        //sc->printNum();
-        //printf("\n");
-        //outTree();
+        if (v != nullptr) {
+            root->setCur(v->delBlock());
+            // --- Конец удаления блока ---//
+            printf("//////////////////\nДерево после удаления блока\n");
+            outTree();
+        }
     }
 }
 
@@ -289,6 +296,7 @@ void Diagram::oper() {
         expression1(res);
         sem91();
         checkCondition(res);
+        //delete res;
         if (flagInterpret) {
             sc->setUK(startBlockFor, startBlockForStr, startBlockForPos);
             goto startBlock;
@@ -319,7 +327,7 @@ void Diagram::oper() {
 }
 
 void Diagram::checkCondition(Node *res) {
-    if (flagInterpret && (res->dataValue.int32Data != 0)) flagInterpret = 1;
+    if (flagInterpret && (res->dataValue->int32Data != 0)) flagInterpret = 1;
     else flagInterpret = 0;
 }
 
@@ -336,11 +344,11 @@ void Diagram::expression1(Node *res) {
     expression2(res);
     tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    Node res1;
+    Node *res1 = new Node();
     while (t == TNEQ || t == TEQ) {
-        expression2(&res1);
+        expression2(res1);
         //--- СЕМ 8 ---//
-        sem8Compare(res, &res1, t);
+        sem8Compare(res, res1, t);
         //--- end СЕМ 8 ---//
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
@@ -348,11 +356,11 @@ void Diagram::expression1(Node *res) {
     sc->setUK(tmpUk);
     if (uno == TMinus) {
         if (res->typeData == TDataInt)
-            res->dataValue.int32Data *= -1;
+            res->dataValue->int32Data *= -1;
         else
-            res->dataValue.int64Data *= -1;
+            res->dataValue->int64Data *= -1;
     }
-
+    delete res1;
 }
 
 void Diagram::expression2(Node *res) {
@@ -362,16 +370,17 @@ void Diagram::expression2(Node *res) {
     int tmpUk;
     tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    Node res1;
+    Node *res1 = new Node();
     while (t == TGE || t == TGT || t == TLE || t == TLT) {
-        expression3(&res1);
+        expression3(res1);
         // -- СЕМ 8 -- //
-        sem8Compare(res, &res1, t);
+        sem8Compare(res, res1, t);
         // --  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
     sc->setUK(tmpUk);
+    delete res1;
 }
 
 void Diagram::expression3(Node *res) {
@@ -381,16 +390,17 @@ void Diagram::expression3(Node *res) {
     int tmpUk;
     tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    Node res1;
+    Node *res1 = new Node();
     while (t == TPlus || t == TMinus) {
-        expression4(&res1);
+        expression4(res1);
         // -- СЕМ 8 -- //
-        sem8(res, &res1, t);
+        sem8(res, res1, t);
         //--  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
     sc->setUK(tmpUk);
+    delete res1;
 }
 
 void Diagram::expression4(Node *res) {
@@ -400,19 +410,20 @@ void Diagram::expression4(Node *res) {
     int tmpUk;
     tmpUk = sc->getUK();
     t = sc->scanner(lex);
-    Node res1;
+    Node *res1 = new Node();
     while (t == TMul || t == TDiv || t == TMod) {
-        expression5(&res1);
+        expression5(res1);
         // -- СЕМ 8 -- //
-        sem8(res, &res1, t);
+        sem8(res, res1, t);
         //--  end СЕМ 8 -- //
         tmpUk = sc->getUK();
         t = sc->scanner(lex);
     }
     sc->setUK(tmpUk);
+    delete res1;
 }
 
-//TODO ++ и -- работают через жопу
+
 void Diagram::expression5(Node *res) {
     TypeLex lex;
     int t;
@@ -505,10 +516,10 @@ void Diagram::sem1(char *_id, int typeData) {
     Tree *v = root->semAddNode(_id, TNodeFunction, typeData, sc);
     int startFuncUk, startFuncLine, startFuncPos;
     sc->getUK(startFuncUk, startFuncLine, startFuncPos);
-    v->getNode()->funcPosition = Position(startFuncUk, startFuncLine, startFuncPos);
-    //sc->printNum();
-    //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",_id,TNodeToName(TNodeFunction), TDataToName(typeData));
-    root->setCur(v);
+    v->getNode()->funcPosition = new Position(startFuncUk, startFuncLine, startFuncPos);
+    sc->printNum();
+    printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n", _id, TNodeToName(TNodeFunction),
+           TDataToName(typeData).c_str());
     //--- end СЕМ 1 ---//
 }
 
@@ -523,11 +534,11 @@ void Diagram::sem3(char *lex, int typeData) {
     //--- end СЕМ 3 ---//
 }
 
-void Diagram::sem4(Node *var, Node resExpress) {
+void Diagram::sem4(Node *var, Node *resExpress) {
     if (!flagInterpret)
         return;
     int type1 = var->typeData;
-    int type2 = resExpress.typeData;
+    int type2 = resExpress->typeData;
     if (type1 < type2)
         sc->printWarningTypes(type1, type2, WSmallType);
     //if (type1 > type2)
@@ -538,40 +549,40 @@ void Diagram::sem4(Node *var, Node resExpress) {
     switch (var->typeData) {
         case TDataLong:
         case TDataInt:
-            switch (resExpress.typeData) {
+            switch (resExpress->typeData) {
                 case TDataInt:
-                    var->dataValue.int32Data = resExpress.dataValue.int32Data;
+                    var->dataValue->int32Data = resExpress->dataValue->int32Data;
                     break;
                 case TDataLongLong:
-                    var->dataValue.int32Data = resExpress.dataValue.int64Data;
+                    var->dataValue->int32Data = resExpress->dataValue->int64Data;
                     break;
                 default:
-                    printf("Ошибка в сем4: тип результата неизвестный = %d\n", resExpress.typeData);
+                    printf("Ошибка в сем4: тип результата неизвестный = %d\n", resExpress->typeData);
             }
             break;
         case TDataLongLong:
-            switch (resExpress.typeData) {
+            switch (resExpress->typeData) {
                 case TDataInt:
-                    var->dataValue.int64Data = resExpress.dataValue.int32Data;
+                    var->dataValue->int64Data = resExpress->dataValue->int32Data;
                     break;
                 case TDataLongLong:
-                    var->dataValue.int64Data = resExpress.dataValue.int64Data;
+                    var->dataValue->int64Data = resExpress->dataValue->int64Data;
                     break;
                 default:
-                    printf("Ошибка в сем4: тип результата неизвестный = %d\n", resExpress.typeData);
+                    printf("Ошибка в сем4: тип результата неизвестный = %d\n", resExpress->typeData);
             }
             break;
         default:
-            printf("Ошибка в сем4: тип переменной неизвестный = %d\n", resExpress.typeData);
+            printf("Ошибка в сем4: тип переменной неизвестный = %d\n", resExpress->typeData);
     }
 
     //Вывод нового значения
     sc->printNum();
     printf("%s %s = ", TDataToName(var->typeData).c_str(), var->id);
     if (var->typeData == TDataInt)
-        printf("%d\n", var->dataValue.int32Data);
+        printf("%d\n", var->dataValue->int32Data);
     else
-        printf("%lld\n", var->dataValue.int64Data);
+        printf("%lld\n", var->dataValue->int64Data);
 }
 
 
@@ -591,11 +602,11 @@ void Diagram::sem5(Node *resExpression1) {
             switch (resExpression1->typeData) {
                 case TDataLong:
                 case TDataInt:
-                    func->dataValue.int32Data = resExpression1->dataValue.int32Data;
+                    func->dataValue->int32Data = resExpression1->dataValue->int32Data;
                     break;
                 case TDataLongLong:
                     sc->printWarningTypes(TDataInt, TDataLongLong, WDifferentTypesFunc);
-                    func->dataValue.int32Data = resExpression1->dataValue.int64Data;
+                    func->dataValue->int32Data = resExpression1->dataValue->int64Data;
                     break;
                 default:
                     printf("Ошибка в сем5: тип результата неизвестный = %d\n", resExpression1->typeData);
@@ -605,10 +616,10 @@ void Diagram::sem5(Node *resExpression1) {
             switch (resExpression1->typeData) {
                 case TDataLong:
                 case TDataInt:
-                    func->dataValue.int64Data = resExpression1->dataValue.int32Data;
+                    func->dataValue->int64Data = resExpression1->dataValue->int32Data;
                     break;
                 case TDataLongLong:
-                    func->dataValue.int64Data = resExpression1->dataValue.int64Data;
+                    func->dataValue->int64Data = resExpression1->dataValue->int64Data;
                     break;
                 default:
                     printf("Ошибка в сем5: тип результата неизвестный = %d\n", resExpression1->typeData);
@@ -617,7 +628,12 @@ void Diagram::sem5(Node *resExpression1) {
         default:
             printf("Ошибка в сем5: тип функции неизвестный = %d\n", func->typeData);
     }
+    if (flagInterpret) {
+        flagInterpret = false;
+        flagReturn = true;
+    }
 }
+
 
 void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
     if (!flagInterpret)
@@ -654,12 +670,12 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int32Data += res1->dataValue.int32Data;
+                            res->dataValue->int32Data += res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
                             res->typeData = TDataLongLong;
-                            res->dataValue.int64Data = res->dataValue.int32Data;
-                            res->dataValue.int64Data += res1->dataValue.int64Data;
+                            res->dataValue->int64Data = res->dataValue->int32Data;
+                            res->dataValue->int64Data += res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сложение: неизвестный тип res1 %d\n", res1->typeData);
@@ -669,10 +685,10 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int64Data += res1->dataValue.int32Data;
+                            res->dataValue->int64Data += res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            res->dataValue.int64Data += res1->dataValue.int64Data;
+                            res->dataValue->int64Data += res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сложение: неизвестный тип res1 %d\n", res1->typeData);
@@ -689,12 +705,12 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int32Data -= res1->dataValue.int32Data;
+                            res->dataValue->int32Data -= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
                             res->typeData = TDataLongLong;
-                            res->dataValue.int64Data = res->dataValue.int32Data;
-                            res->dataValue.int64Data -= res1->dataValue.int64Data;
+                            res->dataValue->int64Data = res->dataValue->int32Data;
+                            res->dataValue->int64Data -= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 вычитание: неизвестный тип res1 %d\n", res1->typeData);
@@ -704,10 +720,10 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int64Data -= res1->dataValue.int32Data;
+                            res->dataValue->int64Data -= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            res->dataValue.int64Data -= res1->dataValue.int64Data;
+                            res->dataValue->int64Data -= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 вычитание: неизвестный тип res1 %d\n", res1->typeData);
@@ -725,16 +741,16 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                         switch (res1->typeData) {
                             case TDataLong:
                             case TDataInt:
-                                if (res1->dataValue.int32Data == 0)
+                                if (res1->dataValue->int32Data == 0)
                                     throw 1;
-                                res->dataValue.int32Data /= res1->dataValue.int32Data;
+                                res->dataValue->int32Data /= res1->dataValue->int32Data;
                                 break;
                             case TDataLongLong:
-                                if (res1->dataValue.int64Data == 0)
+                                if (res1->dataValue->int64Data == 0)
                                     throw 1;
                                 res->typeData = TDataLongLong;
-                                res->dataValue.int64Data = res->dataValue.int32Data;
-                                res->dataValue.int64Data /= res1->dataValue.int64Data;
+                                res->dataValue->int64Data = res->dataValue->int32Data;
+                                res->dataValue->int64Data /= res1->dataValue->int64Data;
                                 break;
                             default:
                                 printf("Сем8 DIV: неизвестный тип res1 %d\n", res1->typeData);
@@ -744,14 +760,14 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                         switch (res1->typeData) {
                             case TDataLong:
                             case TDataInt:
-                                if (res1->dataValue.int32Data == 0)
+                                if (res1->dataValue->int32Data == 0)
                                     throw 1;
-                                res->dataValue.int64Data /= res1->dataValue.int32Data;
+                                res->dataValue->int64Data /= res1->dataValue->int32Data;
                                 break;
                             case TDataLongLong:
-                                if (res1->dataValue.int64Data == 0)
+                                if (res1->dataValue->int64Data == 0)
                                     throw 1;
-                                res->dataValue.int64Data /= res1->dataValue.int64Data;
+                                res->dataValue->int64Data /= res1->dataValue->int64Data;
                                 break;
                             default:
                                 printf("Сем8 DIV: неизвестный тип res1 %d\n", res1->typeData);
@@ -771,12 +787,12 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int32Data *= res1->dataValue.int32Data;
+                            res->dataValue->int32Data *= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
                             res->typeData = TDataLongLong;
-                            res->dataValue.int64Data = res->dataValue.int32Data;
-                            res->dataValue.int64Data *= res1->dataValue.int64Data;
+                            res->dataValue->int64Data = res->dataValue->int32Data;
+                            res->dataValue->int64Data *= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 Mul: неизвестный тип res1 %d\n", res1->typeData);
@@ -786,10 +802,10 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int64Data *= res1->dataValue.int32Data;
+                            res->dataValue->int64Data *= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            res->dataValue.int64Data *= res1->dataValue.int64Data;
+                            res->dataValue->int64Data *= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 Mul: неизвестный тип res1 %d\n", res1->typeData);
@@ -806,12 +822,12 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int32Data %= res1->dataValue.int32Data;
+                            res->dataValue->int32Data %= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
                             res->typeData = TDataLongLong;
-                            res->dataValue.int64Data = res->dataValue.int32Data;
-                            res->dataValue.int64Data %= res1->dataValue.int64Data;
+                            res->dataValue->int64Data = res->dataValue->int32Data;
+                            res->dataValue->int64Data %= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 MOD: неизвестный тип res1 %d\n", res1->typeData);
@@ -821,10 +837,10 @@ void Diagram::sem8(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            res->dataValue.int64Data %= res1->dataValue.int32Data;
+                            res->dataValue->int64Data %= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            res->dataValue.int64Data %= res1->dataValue.int64Data;
+                            res->dataValue->int64Data %= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 MOD: неизвестный тип res1 %d\n", res1->typeData);
@@ -851,10 +867,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int32Data == res1->dataValue.int32Data;
+                            result = res->dataValue->int32Data == res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int32Data == res1->dataValue.int64Data;
+                            result = res->dataValue->int32Data == res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -864,10 +880,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int64Data == res1->dataValue.int32Data;
+                            result = res->dataValue->int64Data == res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int64Data == res1->dataValue.int64Data;
+                            result = res->dataValue->int64Data == res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -884,10 +900,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int32Data != res1->dataValue.int32Data;
+                            result = res->dataValue->int32Data != res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int32Data != res1->dataValue.int64Data;
+                            result = res->dataValue->int32Data != res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -897,10 +913,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int64Data != res1->dataValue.int32Data;
+                            result = res->dataValue->int64Data != res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int64Data != res1->dataValue.int64Data;
+                            result = res->dataValue->int64Data != res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -917,10 +933,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int32Data >= res1->dataValue.int32Data;
+                            result = res->dataValue->int32Data >= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int32Data >= res1->dataValue.int64Data;
+                            result = res->dataValue->int32Data >= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -930,10 +946,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int64Data >= res1->dataValue.int32Data;
+                            result = res->dataValue->int64Data >= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int64Data >= res1->dataValue.int64Data;
+                            result = res->dataValue->int64Data >= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -950,10 +966,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int32Data > res1->dataValue.int32Data;
+                            result = res->dataValue->int32Data > res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int32Data > res1->dataValue.int64Data;
+                            result = res->dataValue->int32Data > res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -963,10 +979,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int64Data > res1->dataValue.int32Data;
+                            result = res->dataValue->int64Data > res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int64Data > res1->dataValue.int64Data;
+                            result = res->dataValue->int64Data > res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -983,10 +999,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int32Data <= res1->dataValue.int32Data;
+                            result = res->dataValue->int32Data <= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int32Data <= res1->dataValue.int64Data;
+                            result = res->dataValue->int32Data <= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -996,10 +1012,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int64Data <= res1->dataValue.int32Data;
+                            result = res->dataValue->int64Data <= res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int64Data <= res1->dataValue.int64Data;
+                            result = res->dataValue->int64Data <= res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -1016,10 +1032,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int32Data < res1->dataValue.int32Data;
+                            result = res->dataValue->int32Data < res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int32Data < res1->dataValue.int64Data;
+                            result = res->dataValue->int32Data < res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -1029,10 +1045,10 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
                     switch (res1->typeData) {
                         case TDataLong:
                         case TDataInt:
-                            result = res->dataValue.int64Data < res1->dataValue.int32Data;
+                            result = res->dataValue->int64Data < res1->dataValue->int32Data;
                             break;
                         case TDataLongLong:
-                            result = res->dataValue.int64Data < res1->dataValue.int64Data;
+                            result = res->dataValue->int64Data < res1->dataValue->int64Data;
                             break;
                         default:
                             printf("Сем8 сравнение: неизвестный тип res1 %d\n", res1->typeData);
@@ -1048,7 +1064,7 @@ void Diagram::sem8Compare(Node *res, Node *res1, int typeOperation) {
 
     res->typeData = TDataInt;
     //res->typeNode = TNodeVar;
-    res->dataValue.int32Data = result;
+    res->dataValue->int32Data = result;
 }
 
 // Если константа, выполнить ++ или - - нельзя.
@@ -1063,12 +1079,12 @@ void Diagram::sem9(Node *res, int typeOperation) {
                 case TDataLong:
                 case TDataInt:
                     //TODO Обрати внимание
-                    root->semGetVar(res->id, sc)->getNode()->dataValue.int32Data++;
-                    res->dataValue.int32Data++;
+                    root->semGetVar(res->id, sc)->getNode()->dataValue->int32Data++;
+                    res->dataValue->int32Data++;
                     break;
                 case TDataLongLong:
-                    root->semGetVar(res->id, sc)->getNode()->dataValue.int64Data++;
-                    res->dataValue.int64Data++;
+                    root->semGetVar(res->id, sc)->getNode()->dataValue->int64Data++;
+                    res->dataValue->int64Data++;
                     break;
                 default:
                     sc->printNum();
@@ -1079,10 +1095,10 @@ void Diagram::sem9(Node *res, int typeOperation) {
             switch (res->typeData) {
                 case TDataLong:
                 case TDataInt:
-                    res->dataValue.int32Data--;
+                    res->dataValue->int32Data--;
                     break;
                 case TDataLongLong:
-                    res->dataValue.int64Data--;
+                    res->dataValue->int64Data--;
                     break;
                 default:
                     printf("Ошибка при выполнении ++ или --. Сем9 : неизвестный тип res %d\n", res->typeData);
@@ -1098,23 +1114,30 @@ void Diagram::sem10(Node *res, TypeLex nameFunc) {
         return;
     Tree *v = root->semGetFunc(nameFunc, sc);
     if (v == nullptr) {
-        res = new Node(TNodeFunction);
+        //res = new Node(TNodeFunction);
     } else {
         res->typeData = v->getNode()->typeData;
         res->init = v->getNode()->init;
     }
+    flagReturn = false;
+    sc->printNum();
+    printf("Вызываем функцию %s\n", nameFunc);
     //Сохраняем текущую позицию по коду
     int saveUk, savePos, saveLine;
     sc->getUK(saveUk, saveLine, savePos);
     //Ставим позицию на начало блока функции
     int funcUk, funcPos, funcLine;
-    v->getNode()->funcPosition.getValues(funcUk, funcLine, funcPos);
+    v->getNode()->funcPosition->getValues(funcUk, funcLine, funcPos);
     sc->setUK(funcUk, funcLine, funcPos);
     //Запоминаем текущий указатель в дереве
     Tree *memCur = root->getCur();
     //Ставим указатель на функцию
-    root->setCur(v);
+    root->setCur(v->getRight());
     sostOper();
+    if (flagReturn) {
+        flagInterpret = true;
+        flagReturn = false;
+    }
     //Восстанавливаем указатель
     root->setCur(memCur);
     sc->setUK(saveUk, saveLine, savePos);
@@ -1134,7 +1157,9 @@ Tree *Diagram::sem11(Node *res, TypeLex nameVar) {
         res->typeData = v->getNode()->typeData;
         res->init = v->getNode()->init;
         strcpy(res->id, v->getNode()->id);
-        res->dataValue = v->getNode()->dataValue;
+        res->dataValue->int32Data = v->getNode()->dataValue->int32Data;
+
+        res->dataValue->int64Data = v->getNode()->dataValue->int64Data;
     }
     return v;
 }
@@ -1148,13 +1173,15 @@ void Diagram::sem12(Node *res, TypeLex lexConst, int typeConst) {
     res->typeNode = TNodeConst;
     res->init = true;
     if (res->typeData == TDataInt)
-        res->dataValue.int32Data = constanta;
+        res->dataValue->int32Data = constanta;
     else
-        res->dataValue.int64Data = constanta;
+        res->dataValue->int64Data = constanta;
 }
 
 
 void Diagram::outTree() {
+    sc->printNum();
+    printf("\n");
     root->printTree();
 }
 

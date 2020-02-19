@@ -21,19 +21,38 @@ Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
     up = _up;
     left = _left;
     right = _right;
-    memcpy(node, _node, sizeof(Node));
+    //memcpy(node, _node, sizeof(Node));
+    node = _node;
+}
+
+Tree::~Tree() {
+    delete this->node;
+}
+
+Tree *Tree::getUp() const {
+    return up;
+}
+
+Tree *Tree::getLeft() const {
+    return left;
+}
+
+Tree *Tree::getRight() const {
+    return right;
 }
 
 // создать левого потомка от текущей вершины this
 void Tree::setLeft(Node *data) {
-    Tree *a = new Tree(NULL, NULL, this, data);
-    left = a;
+    if (left != nullptr)
+        delete left;
+    left = std::make_unique<Tree>(nullptr, nullptr, this, data);
 }
 
 // создать правого потомка от текущей вершины this
 void Tree::setRight(Node *data) {
-    Tree *a = new Tree(NULL, NULL, this, data);
-    right = a;
+    if (cur->right != nullptr)
+        delete right;
+    right = std::make_unique<Tree>(nullptr, nullptr, this, data);
 }
 
 Tree *Tree::findUp(Tree *from, TypeLex id) {
@@ -109,11 +128,11 @@ void Tree::printTree() {
 }
 
 void Tree::setCur(Tree *a) {
-    cur = a;
+    Tree::cur = a;
 }
 
 Tree *Tree::getCur() {
-    return cur;
+    return Tree::cur;
 }
 
 void Tree::semSetTypeNode(Tree *addr, int typeNode) {
@@ -156,32 +175,24 @@ Tree *Tree::semGetFunc(TypeLex a, Scanner *sc) {
 Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
     if (dupControl(cur, id))
         sc->printError("повторное описание идентификатора", id, false);
-    Tree *v;
-    Node *pNode = new Node(typeNode, id, typeData);
-    cur->setLeft(pNode);
+    cur->setLeft(std::make_unique<Node>(typeNode, id, typeData));
     cur = cur->left;
     if (typeNode == TNodeFunction) {
         // точка возврата после выхода из функции
-        v = cur;
-        Node emptyNode(TNodeEmpty);
-        strcpy(emptyNode.id, "###");
-        cur->setRight(&emptyNode);
-        cur = cur->right;
-        return v;
+        cur->setRight(new Node(TNodeEmpty));
+        //cur = cur->right;
+        return cur;
     }
     return cur;
 }
 
+//Возвращает указатель на блок
 Tree *Tree::semAddBlock() {
     Tree *v;
-    Node emptyNode1(TNodeEmpty), emptyNode2(TNodeEmpty);
-    strcpy(emptyNode1.id, "###");
-    strcpy(emptyNode2.id, "###");
-    cur->setLeft(&emptyNode1);
-    //TODO хз
+    cur->setLeft(new Node(TNodeEmpty));
     v = cur;
     cur = cur->left;
-    cur->setRight(&emptyNode2);
+    cur->setRight(new Node(TNodeEmpty));
     cur = cur->right;
     return v;
 }
@@ -191,24 +202,18 @@ Node *Tree::getNode() const {
     return node;
 }
 
-Tree *Tree::delBlock(bool needDeleteFunctions) {
-    Tree *res = nullptr;
-    /*
-    if(this->node->typeNode == TNodeFunction){
-        if(needDeleteFunctions){
-            res = this->up;
-            res->left->delTree();
-            res->left = nullptr;
-            return res;
-        } else
-            return this;
+Tree *Tree::delBlock() {
+    if (this->left != nullptr) {
+        this->left->delTree();
+        this->left = nullptr;
+
     }
-     */
-    res = this;
-    //(res->left == this) ? res->left = nullptr : res->right = nullptr;
-    this->left->delTree();
-    res->left = nullptr;
-    return res;
+    if (this->right != nullptr) {
+        this->right->delTree();
+        this->right = nullptr;
+
+    }
+    return this;
 }
 
 void Tree::delTree() {

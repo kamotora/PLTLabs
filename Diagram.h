@@ -9,8 +9,8 @@
 #include "Tree.h"
 #include <iostream>
 #include <string>
-#include "vector"
-
+#include <vector>
+#include <stdio.h>
 
 class Diagram {
 private:
@@ -87,8 +87,6 @@ public:
 
     void sem3(TypeLex lex, int data);
 
-    void sem4(Node *var, Node resExpress);
-
     static bool isFlagInterpret();
 
     static void setFlagInterpret(bool flagInterpret);
@@ -98,6 +96,8 @@ public:
     void checkCondition(Node *res);
 
     void sem4(Node *var, Node *resExpress);
+
+    static bool flagReturn;
 };
 
 

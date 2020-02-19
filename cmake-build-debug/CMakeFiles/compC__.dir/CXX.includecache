@@ -22,7 +22,9 @@ iostream
 string
 -
 vector
-/home/artem/compC++/vector
+-
+stdio.h
+-
 
 /home/artem/compC++/Scanner.h
 defs.h
