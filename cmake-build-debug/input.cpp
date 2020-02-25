@@ -1,20 +1,16 @@
-int a = 5;
-
-int fun(){
-    a = a;
-    return a + 1;
-    a = a * a;
-    {
-        int b = a / 3;
-    }
-}
-
-int fun1(){
+int fun1()
+{
     int i = 0;
-    for(i = 0; i < 5000000; i++)
+    for(i = 0; i < 500000; i++)
     {
         {
-            int a, b, c , d , k , l ,m, q, z, x;
+            //int a, b, c , d , k , l ,m, q, z, x;
+            int a;
+            int b;
+            int c;
+            int d;
+            int f;
+            int g;
         }
     }
     return i;
@@ -23,8 +19,5 @@ int fun1(){
 
 
 int main(){
-    int a = 10000;
-    int b = fun();
-    a = a;
-    b = fun1();
+    int b = fun1();
 }

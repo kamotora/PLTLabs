@@ -345,6 +345,7 @@ int Scanner::scanner(TypeLex lex)  {
     }
     lex[i++] = t[uk++];
     pos++;
+    printf("%c", t[uk]);
     printError(EWrongChar);
     return TErr;
 }

@@ -53,10 +53,14 @@ public:
     }
 
     ~Node() {
-        if (this->dataValue != nullptr)
+        if (this->dataValue != nullptr) {
             delete this->dataValue;
-        if (this->funcPosition != nullptr)
+            dataValue = nullptr;
+        }
+        if (this->funcPosition != nullptr) {
             delete this->funcPosition;
+            funcPosition = nullptr;
+        }
     }
 
     Node(int _typeNode) {
@@ -96,34 +100,34 @@ public:
     void setRight(Node *data);
 
     //Найти элемент от заданной вершины from до корня
-    Tree *findUp(Tree *from, TypeLex id);
+    static Tree *findUp(Tree *from, TypeLex id);
 
     //Найти элемент от текущей вершины до корня
     Tree *findUp(TypeLex id);
 
     // поиск прямых потомков заданной вершины from
-    Tree *findRightLeft(Tree *from, TypeLex id);
+    static Tree *findRightLeft(Tree *from, TypeLex id);
 
     // поиск прямых потомков текущей вершины this
     Tree *findRightLeft(TypeLex id);
 
     // поиск данных в дереве от заданной вершины from на одном уровне вложенности
-    Tree *findUpOneLevel(Tree *from, TypeLex id);
+    static Tree *findUpOneLevel(Tree *from, TypeLex id);
 
     void printTree();
 
     // ------------------------ Семантические подпрограммы ------------------------
 
-    void setCur(Tree *a);
+    static void setCur(Tree *a);
 
-    Tree *getCur();
+    static Tree *getCur();
 
     // проверка идентификатора на повторное описание внутри блока
     int dupControl(Tree *addr, TypeLex id);
 
-    void semSetTypeData(Tree *addr, int typeData);
+    static void semSetTypeData(Tree *addr, int typeData);
 
-    void semSetTypeNode(Tree *addr, int typeNode);
+    static void semSetTypeNode(Tree *addr, int typeNode);
 
     // найти в таблице переменную с именем а (сем11)
     Tree *semGetVar(TypeLex a, Scanner *sc);
@@ -138,9 +142,7 @@ public:
 
     Node *getNode() const;
 
-    Tree *findUp(int typeNode);
-
-    void delTree();
+    static Tree *findUp(int typeNode);
 
     Tree *getUp() const;
 
@@ -148,10 +150,11 @@ public:
 
     Tree *getRight() const;
 
+    static void FreeTree(Tree *tree);
 
-    Tree *delBlock();
+    void delBlock(Tree *tree);
 
-    void FreeTree(Tree *tree);
+    void delBlockv2();
 };
 
 

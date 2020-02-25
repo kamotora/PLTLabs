@@ -5,15 +5,12 @@
 #include "Tree.h"
 
 Tree *Tree::cur;
-
+long long create = 0, del = 0;
 Tree::Tree() {
     node = new Node(TNodeEmpty);
     up = NULL;
     left = NULL;
     right = NULL;
-
-    cur = this;
-
 }
 
 Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
@@ -26,6 +23,7 @@ Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
 
 Tree::~Tree() {
     delete node;
+    node = nullptr;
 }
 
 Tree *Tree::getUp() const {
@@ -174,6 +172,8 @@ Tree *Tree::semGetFunc(TypeLex a, Scanner *sc) {
 Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
     if (dupControl(cur, id))
         sc->printError("повторное описание идентификатора", id, false);
+    if (cur == nullptr)
+        cur = this;
     cur->setLeft(new Node(typeNode, id, typeData));
     cur = cur->left;
     if (typeNode == TNodeFunction) {
@@ -187,10 +187,14 @@ Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
 
 //Возвращает указатель на блок
 Tree *Tree::semAddBlock() {
+    if (cur == nullptr)
+        cur = this;
+    printf("Добавили пустую вершину\n");
     Tree *v;
     cur->setLeft(new Node(TNodeEmpty));
     cur = cur->left;
     v = cur;
+    printf("Добавили пустую вершину\n");
     cur->setRight(new Node(TNodeEmpty));
     cur = cur->right;
     return v;
@@ -201,10 +205,12 @@ Node *Tree::getNode() const {
     return node;
 }
 
-Tree *Tree::delBlock() {
-    (up->left == this) ? up->left = nullptr : up->right = nullptr;
-    FreeTree(this);
-    return up;
+void Tree::delBlock(Tree *tree) {
+    //Удаляем указатель на данное поддерево
+    (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
+    setCur(tree->up);
+    //Удаляем само поддерево
+    FreeTree(tree);
 }
 
 void Tree::FreeTree(Tree *tree) {
@@ -212,7 +218,26 @@ void Tree::FreeTree(Tree *tree) {
         return;
     if (tree->left) FreeTree(tree->left);
     if (tree->right) FreeTree(tree->right);
+    (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
+    del += sizeof(tree);
+    printf("Удалили %s\n", tree->getNode()->id);
     delete tree;
+    tree = nullptr;
+}
+
+void Tree::delBlockv2() {
+    while (cur->node->typeNode != TNodeEmpty) {
+        if (cur->left) delete cur->left;
+        if (cur->right) delete cur->right;
+        cur = cur->up;
+    }
+    if (cur->left) delete cur->left;
+    if (cur->right) delete cur->right;
+    cur = cur->up;
+    if (cur->left) delete cur->left;
+    if (cur->right) delete cur->right;
+    cur = cur->up;
+    cur->left = cur->right = nullptr;
 }
 
 

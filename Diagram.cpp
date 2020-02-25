@@ -11,6 +11,7 @@ bool Diagram::flagInterpret = true;
 bool Diagram::flagReturn = false;
 
 void Diagram::prog() {
+    root->setCur(root);
     TypeLex lex;
     int t, tmpUk;
 
@@ -198,7 +199,8 @@ void Diagram::sostOper() {
         if (v != nullptr) {
             //printf("До удаления блока:\n");
             //outTree();
-            root->setCur(v->delBlock());
+            //root->delBlockv2();
+            root->delBlock(v);
             // --- Конец удаления блока ---//
             //printf("//////////////////\nДерево после удаления блока\n");
             //outTree();
@@ -519,19 +521,16 @@ void Diagram::sem1(char *_id, int typeData) {
     sc->getUK(startFuncUk, startFuncLine, startFuncPos);
     v->getNode()->funcPosition = new Position(startFuncUk, startFuncLine, startFuncPos);
     sc->printNum();
-    printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n", _id, TNodeToName(TNodeFunction),
-           TDataToName(typeData).c_str());
+    //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n", _id, TNodeToName(TNodeFunction),TDataToName(typeData).c_str());
     //--- end СЕМ 1 ---//
 }
-
 
 void Diagram::sem3(char *lex, int typeData) {
     if (!flagInterpret)
         return;
     // --- СЕМ 3 ---//
     Tree *v = root->semAddNode(lex, TNodeVar, typeData, sc);
-    //sc->printNum();
-    //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(TNodeVar), TDataToName(typeData));
+    //printf("Добавлен идентификатор %s с типом элемента %s и типом данных %s\n",lex,TNodeToName(TNodeVar), TDataToName(typeData).c_str());
     //--- end СЕМ 3 ---//
 }
 

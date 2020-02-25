@@ -81,7 +81,6 @@ public:
 
     void outTree();
 
-    void sem1();
 
     void sem1(char *_id, int typeData);
 
