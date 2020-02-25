@@ -14,11 +14,11 @@ Tree::Tree() {
 }
 
 Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
-    node = new Node();
     up = _up;
     left = _left;
     right = _right;
     node = _node;
+    printf("Добавили %s\n", node->id);
 }
 
 Tree::~Tree() {
@@ -189,12 +189,10 @@ Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
 Tree *Tree::semAddBlock() {
     if (cur == nullptr)
         cur = this;
-    printf("Добавили пустую вершину\n");
     Tree *v;
     cur->setLeft(new Node(TNodeEmpty));
     cur = cur->left;
     v = cur;
-    printf("Добавили пустую вершину\n");
     cur->setRight(new Node(TNodeEmpty));
     cur = cur->right;
     return v;
@@ -219,7 +217,6 @@ void Tree::FreeTree(Tree *tree) {
     if (tree->left) FreeTree(tree->left);
     if (tree->right) FreeTree(tree->right);
     (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
-    del += sizeof(tree);
     printf("Удалили %s\n", tree->getNode()->id);
     delete tree;
     tree = nullptr;

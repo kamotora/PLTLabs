@@ -34,15 +34,14 @@ struct Position {
     }
 };
 
-class Node {
-public:
+struct Node {
     // пустой, переменная, функция
     int typeNode;
     TypeLex id;
     // тип (int,short, long, long long)
     int typeData;
-    DataValue *dataValue = new DataValue(); // значение
-    Position *funcPosition = nullptr;
+    DataValue dataValue; // значение
+    Position funcPosition;
     bool init;
 
     Node() {
@@ -53,14 +52,6 @@ public:
     }
 
     ~Node() {
-        if (this->dataValue != nullptr) {
-            delete this->dataValue;
-            dataValue = nullptr;
-        }
-        if (this->funcPosition != nullptr) {
-            delete this->funcPosition;
-            funcPosition = nullptr;
-        }
     }
 
     Node(int _typeNode) {
