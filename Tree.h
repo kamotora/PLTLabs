@@ -68,6 +68,11 @@ struct Node {
         memcpy(id, _id, strlen(_id) + 1);
         //funcPosition = new Position();
     }
+
+    Node(int typeNode, const char *_id, int typeData, const Position &funcPosition) :
+            typeNode(typeNode), typeData(typeData), funcPosition(funcPosition) {
+        memcpy(id, _id, strlen(_id) + 1);
+    }
 };
 
 class Tree {
@@ -129,6 +134,8 @@ public:
     // Добавить переменную или функцию (сем1),(сем3)
     Tree *semAddNode(char *id, int typeNode, int typeData, Scanner *sc);
 
+    Tree *semAddNode(Node *node);
+
     Tree *semAddBlock();
 
     Node *getNode() const;
@@ -143,9 +150,9 @@ public:
 
     static void FreeTree(Tree *tree);
 
-    void delBlock(Tree *tree);
+    Tree *findPlaceForDupFunc(Tree *root);
 
-    void delBlockv2();
+    void delBlock(Tree *tree, bool itsFunc);
 };
 
 

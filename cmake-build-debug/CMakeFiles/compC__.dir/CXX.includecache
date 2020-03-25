@@ -6,17 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/home/artem/compC++/Diagram.cpp
+/home/kamotora/compC++/Diagram.cpp
 Diagram.h
-/home/artem/compC++/Diagram.h
-Tree.h
-/home/artem/compC++/Tree.h
+/home/kamotora/compC++/Diagram.h
 
-/home/artem/compC++/Diagram.h
+/home/kamotora/compC++/Diagram.h
 Scanner.h
-/home/artem/compC++/Scanner.h
+/home/kamotora/compC++/Scanner.h
 Tree.h
-/home/artem/compC++/Tree.h
+/home/kamotora/compC++/Tree.h
+Semant.h
+/home/kamotora/compC++/Semant.h
 iostream
 -
 string
@@ -26,41 +26,53 @@ vector
 stdio.h
 -
 
-/home/artem/compC++/LL1.h
+/home/kamotora/compC++/LL1.h
 defs.h
-/home/artem/compC++/defs.h
+/home/kamotora/compC++/defs.h
 Tree.h
-/home/artem/compC++/Tree.h
+/home/kamotora/compC++/Tree.h
 iostream
 -
 
-/home/artem/compC++/Scanner.h
+/home/kamotora/compC++/Scanner.h
 defs.h
-/home/artem/compC++/defs.h
+/home/kamotora/compC++/defs.h
 
-/home/artem/compC++/Tree.h
-defs.h
-/home/artem/compC++/defs.h
+/home/kamotora/compC++/Semant.cpp
+Semant.h
+/home/kamotora/compC++/Semant.h
+
+/home/kamotora/compC++/Semant.h
+Tree.h
+/home/kamotora/compC++/Tree.h
 Scanner.h
-/home/artem/compC++/Scanner.h
+/home/kamotora/compC++/Scanner.h
+defs.h
+/home/kamotora/compC++/defs.h
+
+/home/kamotora/compC++/Tree.h
+defs.h
+/home/kamotora/compC++/defs.h
+Scanner.h
+/home/kamotora/compC++/Scanner.h
 memory
 -
 
-/home/artem/compC++/defs.h
+/home/kamotora/compC++/defs.h
 iostream
 -
 cstring
 -
 
-/home/artem/compC++/main.cpp
+/home/kamotora/compC++/main.cpp
 iostream
 -
 defs.h
-/home/artem/compC++/defs.h
+/home/kamotora/compC++/defs.h
 Scanner.h
-/home/artem/compC++/Scanner.h
+/home/kamotora/compC++/Scanner.h
 Diagram.h
-/home/artem/compC++/Diagram.h
+/home/kamotora/compC++/Diagram.h
 LL1.h
-/home/artem/compC++/LL1.h
+/home/kamotora/compC++/LL1.h
 

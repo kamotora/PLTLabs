@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/compC__.dir/Diagram.cpp.o"
   "CMakeFiles/compC__.dir/LL1.cpp.o"
   "CMakeFiles/compC__.dir/Scanner.cpp.o"
+  "CMakeFiles/compC__.dir/Semant.cpp.o"
   "CMakeFiles/compC__.dir/Tree.cpp.o"
   "CMakeFiles/compC__.dir/defs.cpp.o"
   "CMakeFiles/compC__.dir/main.cpp.o"

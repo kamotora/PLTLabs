@@ -27,7 +27,10 @@ int main(int argc, char *argv[]) {
     } while(type!=TEnd);
     */
     Diagram *diagram = new Diagram(sc);
-    diagram->setFlagInterpret(true);
+    Semant *semant = new Semant(sc);
+    semant->setFlagInterpret(true);
+
+    diagram->setSemant(semant);
     diagram->prog();
     /*
     LL1 *anazyle = new LL1(sc);

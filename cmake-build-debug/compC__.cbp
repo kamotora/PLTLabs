@@ -8,116 +8,122 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/artem/compC++/cmake-build-debug"/>
+				<Option working_dir="/home/kamotora/compC++/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/artem/compC++/cmake-build-debug"/>
+				<Option working_dir="/home/kamotora/compC++/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="compC__">
-				<Option output="/home/artem/compC++/cmake-build-debug/compC__" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/artem/compC++/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/include/c++/9"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
-					<Add directory="/usr/include/c++/9/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 compC__"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="compC__/fast">
-				<Option output="/home/artem/compC++/cmake-build-debug/compC__" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/artem/compC++/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/include/c++/9"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
-					<Add directory="/usr/include/c++/9/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 compC__/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/artem/compC++/cmake-build-debug"/>
+				<Option working_dir="/home/kamotora/compC++/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/artem/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="compC__">
+				<Option output="/home/kamotora/compC++/cmake-build-debug/compC__" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/kamotora/compC++/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 compC__"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="compC__/fast">
+				<Option output="/home/kamotora/compC++/cmake-build-debug/compC__" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/kamotora/compC++/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 compC__/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/kamotora/compC++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/artem/compC++/Diagram.cpp">
+		<Unit filename="/home/kamotora/compC++/Diagram.cpp">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/Diagram.h">
+		<Unit filename="/home/kamotora/compC++/Diagram.h">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/LL1.cpp">
+		<Unit filename="/home/kamotora/compC++/LL1.cpp">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/LL1.h">
+		<Unit filename="/home/kamotora/compC++/LL1.h">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/Scanner.cpp">
+		<Unit filename="/home/kamotora/compC++/Scanner.cpp">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/Scanner.h">
+		<Unit filename="/home/kamotora/compC++/Scanner.h">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/Tree.cpp">
+		<Unit filename="/home/kamotora/compC++/Semant.cpp">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/Tree.h">
+		<Unit filename="/home/kamotora/compC++/Semant.h">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/defs.cpp">
+		<Unit filename="/home/kamotora/compC++/Tree.cpp">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/defs.h">
+		<Unit filename="/home/kamotora/compC++/Tree.h">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/main.cpp">
+		<Unit filename="/home/kamotora/compC++/defs.cpp">
 			<Option target="compC__"/>
 		</Unit>
-		<Unit filename="/home/artem/compC++/CMakeLists.txt">
+		<Unit filename="/home/kamotora/compC++/defs.h">
+			<Option target="compC__"/>
+		</Unit>
+		<Unit filename="/home/kamotora/compC++/main.cpp">
+			<Option target="compC__"/>
+		</Unit>
+		<Unit filename="/home/kamotora/compC++/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

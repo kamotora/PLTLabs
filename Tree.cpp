@@ -18,7 +18,7 @@ Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
     left = _left;
     right = _right;
     node = _node;
-    printf("Добавили %s\n", node->id);
+    //printf("Добавили %s\n", node->id);
 }
 
 Tree::~Tree() {
@@ -151,7 +151,6 @@ int Tree::dupControl(Tree *addr, TypeLex id) {
 Tree *Tree::semGetVar(TypeLex a, Scanner *sc) {
     Tree *v = findUp(cur, a);
     if (v == NULL) {
-        //printTree();
         sc->printError("отсутствует описание идентификатора", a, false);
     } else if (v->node->typeNode == TNodeFunction)
         sc->printError("неверное использование вызова функции", a, false);
@@ -185,6 +184,18 @@ Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
     return cur;
 }
 
+Tree *Tree::semAddNode(Node *node) {
+    cur->setLeft(new Node(node->typeNode, node->id, node->typeData, node->funcPosition));
+    cur = cur->left;
+    if (node->typeNode == TNodeFunction) {
+        // точка возврата после выхода из функции
+        cur->setRight(new Node(TNodeEmpty));
+        //cur = cur->right;
+        return cur;
+    }
+    return cur;
+}
+
 //Возвращает указатель на блок
 Tree *Tree::semAddBlock() {
     if (cur == nullptr)
@@ -203,10 +214,13 @@ Node *Tree::getNode() const {
     return node;
 }
 
-void Tree::delBlock(Tree *tree) {
+void Tree::delBlock(Tree *tree, bool itsFunc) {
     //Удаляем указатель на данное поддерево
     (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
-    setCur(tree->up);
+    if (!itsFunc)
+        setCur(tree->up);
+    else
+        itsFunc = false;
     //Удаляем само поддерево
     FreeTree(tree);
 }
@@ -217,25 +231,17 @@ void Tree::FreeTree(Tree *tree) {
     if (tree->left) FreeTree(tree->left);
     if (tree->right) FreeTree(tree->right);
     (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
-    printf("Удалили %s\n", tree->getNode()->id);
+    //printf("Удалили %s\n", tree->getNode()->id);
     delete tree;
-    tree = nullptr;
 }
 
-void Tree::delBlockv2() {
-    while (cur->node->typeNode != TNodeEmpty) {
-        if (cur->left) delete cur->left;
-        if (cur->right) delete cur->right;
-        cur = cur->up;
-    }
-    if (cur->left) delete cur->left;
-    if (cur->right) delete cur->right;
-    cur = cur->up;
-    if (cur->left) delete cur->left;
-    if (cur->right) delete cur->right;
-    cur = cur->up;
-    cur->left = cur->right = nullptr;
+Tree *Tree::findPlaceForDupFunc(Tree *root) {
+    while (root->left)
+        root = root->left;
+    return root;
 }
+
+
 
 
 

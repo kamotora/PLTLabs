@@ -11,13 +11,13 @@ class Scanner{
 private:
     //сканируемый модуль
     TypeMod t;
-    int uk;
     int pos,line;
     int tmpPos, tmpLine;
     static bool isDigit10(char ch);
     static bool isLetter(char ch);
     static bool isDigit16(char ch);
 public:
+    int uk;
     void newLine();
     int getUK();
     int scanner(TypeLex typeLex);

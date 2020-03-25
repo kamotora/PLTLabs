@@ -11,7 +11,7 @@
 
 using namespace std;
 
-// максимальный размер магазина
+
 struct SymbMag {
     unsigned char isTerminal;
 
