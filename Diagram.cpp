@@ -1,8 +1,3 @@
-//
-// Created by artem on 16.10.2019.
-//
-
-
 #include "Diagram.h"
 
 

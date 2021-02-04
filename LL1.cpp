@@ -1,7 +1,3 @@
-//
-// Created by artem on 17.11.2019.
-//
-
 #include "LL1.h"
 
 LL1::LL1(Scanner *s) {

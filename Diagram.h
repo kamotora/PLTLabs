@@ -1,7 +1,3 @@
-//
-// Created by artem on 16.10.2019.
-//
-
 #ifndef COMPC___DIAGRAM_H
 #define COMPC___DIAGRAM_H
 

@@ -1,7 +1,3 @@
-//
-// Created by artem on 02.10.2019.
-//
-
 #ifndef COMPC___SCANNER_H
 #define COMPC___SCANNER_H
 

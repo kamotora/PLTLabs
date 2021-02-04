@@ -1,7 +1,3 @@
-//
-// Created by kamotora on 25.03.2020.
-//
-
 #ifndef COMPC___SEMANT_H
 #define COMPC___SEMANT_H
 

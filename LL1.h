@@ -1,7 +1,3 @@
-//
-// Created by artem on 17.11.2019.
-//
-
 #ifndef COMPC___LL1_H
 #define COMPC___LL1_H
 

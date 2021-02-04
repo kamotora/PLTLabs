@@ -1,7 +1,3 @@
-//
-// Created by artem on 02.10.2019.
-//
-
 #ifndef COMPC___DEFS_H
 #define COMPC___DEFS_H
 

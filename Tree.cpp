@@ -1,7 +1,3 @@
-//
-// Created by artem on 30.10.2019.
-//
-
 #include "Tree.h"
 
 Tree *Tree::cur;

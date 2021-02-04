@@ -1,7 +1,3 @@
-//
-// Created by kamotora on 25.03.2020.
-//
-
 #include "Semant.h"
 
 bool Semant::flagInterpret = true;

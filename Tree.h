@@ -1,7 +1,3 @@
-//
-// Created by artem on 30.10.2019.
-//
-
 #ifndef COMPC___TREE_H
 #define COMPC___TREE_H
 
