@@ -29,21 +29,11 @@ public:
 
     void printWarning(const std::string &error);
 
-    void setPos(int _pos);
-
-    int getPos();
-
     void setUK(int i);
-
-    void setLine(int _line);
-
-    int getLine();
 
     void printError(const std::string &error);
 
     void printError(std::string error, char *lex);
-
-    void printError(std::string error, char *lex, bool needExit);
 
     void printNum();
 
@@ -56,5 +46,9 @@ public:
     void setUK(int i, int line, int pos);
 
     void getUK(int &get_uk, int &get_line, int &get_pos);
+
+    void printError(const std::string &error, bool needExit);
+
+    void printError(std::string error, const char *lex, bool needExit);
 };
 #endif //COMPC___SCANNER_H

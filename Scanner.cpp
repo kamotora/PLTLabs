@@ -66,6 +66,12 @@ void Scanner::printError(const std::string &error) {
     exit(1);
 }
 
+void Scanner::printError(const std::string &error, bool needExit) {
+    printError(error);
+    if (needExit)
+        exit(1);
+}
+
 void Scanner::printWarning(const std::string &error) {
     std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << error << "\n";
 }
@@ -95,7 +101,7 @@ void Scanner::printError(std::string error, TypeLex lex) {
     exit(1);
 }
 
-void Scanner::printError(std::string error, TypeLex lex, bool needExit) {
+void Scanner::printError(std::string error, const char *lex, bool needExit) {
     std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " ) \n";
     if (needExit)
         exit(1);

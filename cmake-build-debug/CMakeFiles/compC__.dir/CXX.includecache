@@ -6,49 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/kamotora/compC++/Diagram.cpp
-Diagram.h
-/home/kamotora/compC++/Diagram.h
-
-/home/kamotora/compC++/Diagram.h
-Scanner.h
-/home/kamotora/compC++/Scanner.h
-Tree.h
-/home/kamotora/compC++/Tree.h
-Semant.h
-/home/kamotora/compC++/Semant.h
-iostream
--
-string
--
-vector
--
-stdio.h
--
-
-/home/kamotora/compC++/LL1.h
-defs.h
-/home/kamotora/compC++/defs.h
-Tree.h
-/home/kamotora/compC++/Tree.h
-iostream
--
-
 /home/kamotora/compC++/Scanner.h
 defs.h
 /home/kamotora/compC++/defs.h
 
-/home/kamotora/compC++/Semant.cpp
-Semant.h
-/home/kamotora/compC++/Semant.h
-
-/home/kamotora/compC++/Semant.h
+/home/kamotora/compC++/Tree.cpp
 Tree.h
 /home/kamotora/compC++/Tree.h
-Scanner.h
-/home/kamotora/compC++/Scanner.h
-defs.h
-/home/kamotora/compC++/defs.h
 
 /home/kamotora/compC++/Tree.h
 defs.h
@@ -63,16 +27,4 @@ iostream
 -
 cstring
 -
-
-/home/kamotora/compC++/main.cpp
-iostream
--
-defs.h
-/home/kamotora/compC++/defs.h
-Scanner.h
-/home/kamotora/compC++/Scanner.h
-Diagram.h
-/home/kamotora/compC++/Diagram.h
-LL1.h
-/home/kamotora/compC++/LL1.h
 

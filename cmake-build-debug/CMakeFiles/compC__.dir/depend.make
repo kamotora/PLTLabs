@@ -11,6 +11,7 @@ CMakeFiles/compC__.dir/Diagram.cpp.o: ../defs.h
 CMakeFiles/compC__.dir/LL1.cpp.o: ../LL1.cpp
 CMakeFiles/compC__.dir/LL1.cpp.o: ../LL1.h
 CMakeFiles/compC__.dir/LL1.cpp.o: ../Scanner.h
+CMakeFiles/compC__.dir/LL1.cpp.o: ../Semant.h
 CMakeFiles/compC__.dir/LL1.cpp.o: ../Tree.h
 CMakeFiles/compC__.dir/LL1.cpp.o: ../defs.h
 

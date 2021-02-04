@@ -4,16 +4,16 @@
 
 #include "LL1.h"
 
-void LL1::epsilon() {
-    //z--;
-}
-
 LL1::LL1(Scanner *s) {
     sc = s;
     Node *node = new Node();
     strcpy(node->id, "###");
     root = new Tree(NULL, NULL, NULL, node);
     Tree::cur = root;
+}
+
+bool isDelta(int t) {
+    return t <= DEL_SetFunc;
 }
 
 int LL1::LL_1() {
@@ -46,11 +46,14 @@ int LL1::LL_1() {
                 sc->printError(str, lex);
                 return -1;
             }
+        } else if (isDelta(magazin[z])) {
+            processingDelta(magazin[z]);
+            z--;
         } else {
             switch (magazin[z]) {
 
                 case netermProgram :
-                    if (t == TShort || t == TInt || t == TLong) {
+                    if (t == TInt || t == TLong) {
                         magazin[z++] = netermProgram;
                         magazin[z++] = netermDescription;
                     } else {
@@ -59,7 +62,7 @@ int LL1::LL_1() {
                     break;
 
                 case netermDescription:
-                    if (t == TShort || t == TInt || t == TLong) {
+                    if (t == TInt || t == TLong) {
                         TypeLex lex1;
                         int tmpUk = sc->getUK();
                         int lexems[5];
@@ -73,9 +76,12 @@ int LL1::LL_1() {
                             }
                         sc->setUK(tmpUk);
                         if (isFunc) {
+                            magazin[z++] = DEL_EndDecl;
+                            magazin[z++] = DEL_EndFunc;
                             magazin[z++] = netermSostOper;
                             magazin[z++] = TRightRoundSkob;
                             magazin[z++] = TLeftRoundSkob;
+                            magazin[z++] = DEL_SetFunc;
                             magazin[z++] = TIdent;
                             magazin[z++] = netermType;
                         } else
@@ -86,17 +92,22 @@ int LL1::LL_1() {
                     break;
 
                 case netermType:
-                    if (t == TShort) {
-                        magazin[z++] = TShort;
-                        magazin[z++] = netermType3;
-                    } else if (t == TLong) {
-                        magazin[z++] = netermType2;
+                    if (t == TLong) {
+                        // Запоминаем тип
+                        currentType = TDataLongLong;
+                        magazin[z++] = DEL_StartDecl;
+                        magazin[z++] = TInt;
+                        magazin[z++] = TLong;
                         magazin[z++] = TLong;
                     } else if (t == TInt) {
-                        magazin[z++] = netermType3;
+                        // Запоминаем тип
+                        currentType = TDataInt;
+                        magazin[z++] = DEL_StartDecl;
+                        magazin[z++] = TInt;
                     } else
-                        sc->printError("Неверный символ, ожидался short,int,long", lex);
+                        sc->printError("Неверный символ, ожидался int,long", lex);
                     break;
+                    /*
                 case netermType2:
                     if (t == TLong) {
                         magazin[z++] = netermType3;
@@ -110,8 +121,10 @@ int LL1::LL_1() {
                     else
                         epsilon();
                     break;
+                */
                 case netermData:
-                    if (t == TShort || t == TInt || t == TLong) {
+                    if (t == TInt || t == TLong) {
+                        magazin[z++] = DEL_EndDecl;
                         magazin[z++] = TTZpt;
                         magazin[z++] = netermList;
                         magazin[z++] = netermType;
@@ -122,6 +135,7 @@ int LL1::LL_1() {
                     if (t == TIdent) {
                         magazin[z++] = netermList2;
                         magazin[z++] = netermAssign2;
+                        magazin[z++] = DEL_SetVar;
                         magazin[z++] = TIdent;
                     } else
                         sc->printError("Неверный символ. Ожидался идентификатор", lex);
@@ -137,6 +151,7 @@ int LL1::LL_1() {
                     break;
                 case netermAssign:
                     if (t == TSave) {
+                        magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TSave;
                     } else
@@ -152,14 +167,16 @@ int LL1::LL_1() {
                     break;
                 case netermSostOper:
                     if (t == TLeftFigSkob) {
+                        magazin[z++] = DEL_EndBlock;
                         magazin[z++] = TRightFigSkob;
                         magazin[z++] = netermBlockSostOper;
+                        magazin[z++] = DEL_SetBlock;
                         magazin[z++] = TLeftFigSkob;
                     } else
                         sc->printError("Неверный символ. Ожидались символы {", lex);
                     break;
                 case netermBlockSostOper:
-                    if (t == TShort || t == TInt || t == TLong) {
+                    if (t == TInt || t == TLong) {
                         magazin[z++] = netermBlockSostOper;
                         magazin[z++] = netermData;
                     } else if (t == TFor || t == TReturn || t == TIdent || t == TTZpt || t == TLeftFigSkob) {
@@ -177,17 +194,27 @@ int LL1::LL_1() {
                         magazin[z++] = TTZpt;
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TTZpt;
+                        // delta matchLeft
+                        //magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermAssign;
+                        // delta find
+                        magazin[z++] = DEL_FindVar;
                         magazin[z++] = TIdent;
                         magazin[z++] = TLeftRoundSkob;
                         magazin[z++] = TFor;
                     } else if (t == TReturn) {
                         magazin[z++] = TTZpt;
+                        // delta returnCheck
+                        magazin[z++] = DEL_ReturnCheck;
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TReturn;
                     } else if (t == TIdent) {
                         magazin[z++] = TTZpt;
+                        // delta matchLeft
+                        //magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermAssign;
+                        // delta find
+                        magazin[z++] = DEL_FindVar;
                         magazin[z++] = TIdent;
                     } else if (t == TLeftFigSkob) {
                         magazin[z++] = netermSostOper;
@@ -199,17 +226,8 @@ int LL1::LL_1() {
 
 
                 case netermExpr1:
-                    if (t == TPlus) {
-                        magazin[z++] = netermExpr1;
-                        magazin[z++] = TPlus;
-                    } else if (t == TMinus) {
-                        magazin[z++] = netermExpr1;
-                        magazin[z++] = TMinus;
-                    } else {
-                        magazin[z++] = netermExpr11;
-                        magazin[z++] = netermExpr2;
-                    }
-                    //sc->printError("Неверный символ. Ожидались +, -, (, идентификатор, константа, ",lex);
+                    magazin[z++] = netermExpr11;
+                    magazin[z++] = netermExpr2;
                     break;
 
                 case netermExpr11:
@@ -217,11 +235,8 @@ int LL1::LL_1() {
                         sc->printError("Неверный символ. Ожидались ==, !=, ),; ", lex);
                     break;
                 case netermExpr2:
-                    //if(t == TIdent || t == TConst10 || t == TConst16 || t == TLeftRoundSkob){
                     magazin[z++] = netermExpr21;
                     magazin[z++] = netermExpr3;
-                    //} else
-                    //   sc->printError("Неверный символ. Ожидались (, идентификатор, константа ",lex);
                     break;
 
                 case netermExpr21:
@@ -229,22 +244,16 @@ int LL1::LL_1() {
                         sc->printError("Неверный символ. Ожидались ==, !=, <=,<,>,>=, ),; ", lex);
                     break;
                 case netermExpr3:
-                    //if(t == TIdent || t == TConst10 || t == TConst16 || t == TLeftRoundSkob){
                     magazin[z++] = netermExpr31;
                     magazin[z++] = netermExpr4;
-                    //} else
-                    //   sc->printError("Неверный символ. Ожидались (, идентификатор, константа ",lex);
                     break;
                 case netermExpr31:
                     if (!expression31(t, lex))
                         sc->printError("Неверный символ. Ожидались +,-, ==, !=, <=,<,>,>=, ),; ", lex);
                     break;
                 case netermExpr4:
-                    //if(t == TIdent || t == TConst10 || t == TConst16 || t == TLeftRoundSkob){
                     magazin[z++] = netermExpr41;
                     magazin[z++] = netermExpr5;
-                    //} else
-                    //    sc->printError("Неверный символ. Ожидались (, идентификатор, константа ",lex);
                     break;
                 case netermExpr41:
                     if (!expression41(t, lex))
@@ -252,20 +261,23 @@ int LL1::LL_1() {
                     break;
                 case netermExpr5:
                     if (t == TAddSelf) {
+                        // delta CheckUnar
+                        magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TAddSelf;
                     } else if (t == TSubSelf) {
+                        // delta CheckUnar
+                        magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TSubSelf;
                     } else {
                         magazin[z++] = netermExpr51;
                         magazin[z++] = netermExpr6;
                     }
-                    //sc->printError("Неверный символ. Ожидались ++,--, (, идентификатор, константа ",lex);
+                    wasConst = false;
                     break;
                 case netermExpr51:
                     if (!expression51(t, lex))
-                        //sc->printError("Неверный символ. Ожидались *,/,% +,-, ==, !=, <=,<,>,>=, ),; ",lex);
                         sc->printError("Неверный символ. Ожидались арифметические и операции сравнения ", lex);
                     break;
                 case netermExpr6:
@@ -273,8 +285,12 @@ int LL1::LL_1() {
                         magazin[z++] = netermFuncCallOrVar;
                         magazin[z++] = TIdent;
                     } else if (t == TConst16) {
+                        // delta PushType && ConstType
+                        magazin[z++] = DEL_ConstType;
                         magazin[z++] = TConst16;
                     } else if (t == TConst10) {
+                        // delta PushType && ConstType
+                        magazin[z++] = DEL_ConstType;
                         magazin[z++] = TConst10;
                     } else if (t == TLeftRoundSkob) {
                         magazin[z++] = TRightRoundSkob;
@@ -285,26 +301,168 @@ int LL1::LL_1() {
                     break;
                 case netermFuncCallOrVar:
                     if (t == TLeftRoundSkob) {
+                        // delta PushType && CallFunc
+                        magazin[z++] = DEL_CallFunc;
                         magazin[z++] = TRightRoundSkob;
                         magazin[z++] = TLeftRoundSkob;
-                    } else
+                    } else {
+                        magazin[z++] = DEL_FindVar;
                         epsilon();
-                    //sc->printError("Неверный символ. Ожидался символ (",lex);
+                    }
                     break;
             }
             z--;
         }
     }
+    printf("// !----- Вывод дерева ----- //\n");
+    root->printTree();
+    printf("// !----- Конец вывода дерева ----- //\n");
     return 123;
+}
+
+void LL1::processingDelta(int delta) {
+
+    switch (delta) {
+
+        // --------------------------------------- Семантика ---------------------------------------
+
+        case DEL_SetVar: {
+            root->semAddNode(currentIdent, TNodeVar, currentType, sc);
+            types[typz++] = currentType;
+            break;
+        }
+
+        case DEL_SetFunc: {
+            treePointers[tpz++] = root->semAddNode(currentIdent, TNodeFunction, currentType, sc);
+            root->setCur(root->getCur()->getRight());
+            break;
+        }
+        case DEL_EndFunc: {
+            root->setCur(treePointers[--tpz]);
+            break;
+        }
+
+        case DEL_FindVar: {
+            Tree *var = root->semGetVar(currentIdent, sc);
+            if (var != nullptr)
+                types[typz++] = var->getNode()->typeData;
+            break;
+        }
+
+        case DEL_SetBlock: {
+            treePointers[tpz++] = root->getCur();
+            root->semAddBlock();
+            break;
+        }
+
+
+        case DEL_EndBlock: {
+            root->setCur(treePointers[--tpz]);
+            break;
+        }
+
+
+        case DEL_StartDecl: {
+            // установить флаг описания данных
+            flagData = true;
+            break;
+        }
+
+        case DEL_EndDecl: {
+            // сбросить флаг описания данных
+            flagData = false;
+            break;
+        }
+
+        case DEL_MatchLeft: {
+            if (typz < 2) {
+                //printf("Недостаточно типов в магазине\n");
+                return;
+            }
+            int second = types[--typz];
+            int first = types[--typz];
+            if (second > first) {
+                sc->printWarningTypes(first, second, WSmallType);
+            }
+            break;
+        }
+
+        case DEL_MatchCompare: {
+            if (typz < 2) {
+                //sc->printError("Недостаточно типов в магазине");
+                return;
+            }
+            int second = types[--typz];
+            int first = types[--typz];
+            types[typz++] = TDataInt;
+            break;
+        }
+
+        case DEL_Match: {
+            if (typz < 2) {
+                sc->printError("Недостаточно типов в магазине");
+                return;
+            }
+            int second = types[--typz];
+            int first = types[--typz];
+            types[typz++] = first > second ? first : second;
+            break;
+        }
+
+        case DEL_CheckUnar: {
+            if (wasConst) {
+                sc->printError("Попытка применить операторы ++ или -- к константе", false);
+            }
+            break;
+        }
+
+        case DEL_ReturnCheck: {
+            Node *cur;
+            int i = tpz - 1;
+            do {
+                cur = treePointers[i--]->getNode();
+            } while (cur->typeNode != TNodeFunction && i >= 0);
+            if (cur->typeNode != TNodeFunction)
+                sc->printError("Не найдено функции в DEL_ReturnCheck");
+            int func, expression;
+            func = cur->typeData;
+            expression = types[--typz];
+            if (expression > func) {
+                sc->printWarningTypes(expression, func, WDifferentTypesFunc);
+            }
+            break;
+        }
+
+        case DEL_CallFunc: {
+            Tree *func = root->semGetFunc(currentIdent, sc);
+            if (func != nullptr)
+                types[typz++] = func->getNode()->typeData;
+            break;
+        }
+
+        case DEL_ConstType: {
+            if (currentTypeConst != TConst10 && currentTypeConst != TConst16)
+                sc->printError("Ошибка в DEL_ConstType, curTypeLex - не константа ",
+                               std::to_string(currentTypeConst).c_str(), false);
+            long long constanta = (currentTypeConst == TConst10) ? strtoull(currentConst, nullptr, 10) : strtoull(
+                    currentConst, nullptr, 16);
+            types[typz++] = sc->getTypeConst(constanta, typeConst);
+            break;
+        }
+    }
 }
 
 bool LL1::expression11(int t, TypeLex lex, int add) {
     if (t == TEQ) {
         magazin[z++] = netermExpr11 + add;
+        // delta match
+        magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr2 + add;
         magazin[z++] = TEQ;
     } else if (t == TNEQ) {
         magazin[z++] = netermExpr11 + add;
+        // delta match
+        magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr2 + add;
         magazin[z++] = TNEQ;
     } else if (t == TRightRoundSkob || t == TTZpt || t == TZpt)
@@ -318,18 +476,26 @@ bool LL1::expression11(int t, TypeLex lex, int add) {
 bool LL1::expression21(int t, TypeLex lex, int add) {
     if (t == TGE) {
         magazin[z++] = netermExpr21 + add;
+        // delta match
+        magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3;
         magazin[z++] = TGE;
     } else if (t == TGT) {
         magazin[z++] = netermExpr21 + add;
+        // delta match
+        magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TGT;
     } else if (t == TLE) {
         magazin[z++] = netermExpr21 + add;
+        // delta match
+        magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TLE;
     } else if (t == TLT) {
         magazin[z++] = netermExpr21 + add;
+        // delta match
+        magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TLT;
     } else if (t == TRightRoundSkob || t == TTZpt || t == TZpt)
@@ -342,10 +508,14 @@ bool LL1::expression21(int t, TypeLex lex, int add) {
 bool LL1::expression31(int t, TypeLex lex, int add) {
     if (t == TPlus) {
         magazin[z++] = netermExpr31 + add;
+        // delta match
+        magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr4 + add;
         magazin[z++] = TPlus;
     } else if (t == TMinus) {
         magazin[z++] = netermExpr31 + add;
+        // delta match
+        magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr4 + add;
         magazin[z++] = TMinus;
     } else if (t == TRightRoundSkob || t == TTZpt || t == TZpt)
@@ -358,14 +528,20 @@ bool LL1::expression31(int t, TypeLex lex, int add) {
 bool LL1::expression41(int t, TypeLex lex, int add) {
     if (t == TMul) {
         magazin[z++] = netermExpr41 + add;
+        // delta match
+        magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TMul;
     } else if (t == TDiv) {
         magazin[z++] = netermExpr41 + add;
+        // delta match
+        magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TDiv;
     } else if (t == TMod) {
         magazin[z++] = netermExpr41 + add;
+        // delta match
+        magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TMod;
     } else if (t == TRightRoundSkob || t == TTZpt || t == TZpt)
@@ -375,10 +551,18 @@ bool LL1::expression41(int t, TypeLex lex, int add) {
     return true;
 }
 
+void LL1::epsilon() {
+    //z--;
+}
+
 bool LL1::expression51(int t, TypeLex lex) {
     if (t == TAddSelf) {
+        // delta checkUn
+        magazin[z++] = DEL_CheckUnar;
         magazin[z++] = TAddSelf;
     } else if (t == TSubSelf) {
+        // delta match
+        magazin[z++] = DEL_CheckUnar;
         magazin[z++] = TSubSelf;
     } else if (t == TRightRoundSkob || t == TTZpt || t == TZpt)
         epsilon();
@@ -392,12 +576,24 @@ bool LL1::expression51(int t, TypeLex lex) {
 // обновляем текущий тип, идентификатор и константу, если надо
 void LL1::getCurrents(int t, TypeLex lex) {
 
-    if (t == TShort || t == TInt || t == TLong) {
-        currentType = t;
+    /*
+    if (t == TInt) {
+        currentType = TDataInt;
+    }else if(t == TLong){
+        currentType = TDataLongLong;
     }
 
+    if (t == TConst10 || t == TConst16) {
+        strcpy(currentConst, lex);
+        currentConstType = t;
+    }
+*/
+    if (t == TConst10 || t == TConst16) {
+        strcpy(currentConst, lex);
+        currentTypeConst = t;
+    }
     if (t == TIdent) {
-        strcpy(currentId, lex);
+        strcpy(currentIdent, lex);
     }
 
 }
@@ -588,4 +784,3 @@ string LL1::codeToString(int code) {
 
     return str;
 }
-

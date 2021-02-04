@@ -113,14 +113,16 @@ void Tree::printTree() {
         printf("Пустая вершина %s ", node->id);
     printf("\n");
 
-    if (left != NULL) {
-        printf("слева от %s: ", node->id);
-        left->printTree();
-    }
     if (right != NULL) {
         printf("справа: от %s: ", node->id);
         right->printTree();
     }
+
+    if (left != NULL) {
+        printf("слева от %s: ", node->id);
+        left->printTree();
+    }
+
 
 }
 
