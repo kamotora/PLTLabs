@@ -1,7 +1,3 @@
-//
-// Created by artem on 02.10.2019.
-//
-
 #ifndef COMPC___SCANNER_H
 #define COMPC___SCANNER_H
 
@@ -11,13 +7,13 @@ class Scanner{
 private:
     //сканируемый модуль
     TypeMod t;
-    int uk;
     int pos,line;
     int tmpPos, tmpLine;
     static bool isDigit10(char ch);
     static bool isLetter(char ch);
     static bool isDigit16(char ch);
 public:
+    int uk;
     void newLine();
     int getUK();
     int scanner(TypeLex typeLex);
@@ -29,29 +25,26 @@ public:
 
     void printWarning(const std::string &error);
 
-    void setPos(int _pos);
-
-    int getPos();
-
     void setUK(int i);
-
-    void setLine(int _line);
-
-    int getLine();
 
     void printError(const std::string &error);
 
     void printError(std::string error, char *lex);
 
-    void printError(std::string error, char *lex, bool needExit);
-
     void printNum();
-
-    int getTypeConst(char *lex, int typeConst, bool isShort = false);
 
     void printWarningTypes(int type1, int type2, int typeWarning);
 
     void printWarning(int typeError, char *lex = nullptr);
 
+    int getTypeConst(long long int constanta, int typeConst);
+
+    void setUK(int i, int line, int pos);
+
+    void getUK(int &get_uk, int &get_line, int &get_pos);
+
+    void printError(const std::string &error, bool needExit);
+
+    void printError(std::string error, const char *lex, bool needExit);
 };
 #endif //COMPC___SCANNER_H

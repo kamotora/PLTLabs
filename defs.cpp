@@ -1,6 +1,3 @@
-//
-// Created by artem on 07.11.2019.
-//
 #include "defs.h"
 
 std::string TDataToName(int TData) {

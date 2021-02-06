@@ -1,18 +1,19 @@
 #include "Scanner.h"
 #include <cstring>
+
 /**
 Программа: главная программа языка С++. Допускается описание функций без параметров, функции возвращают значение.
-Типы данных: int ( в том числе  short , long, long long) .
+Типы данных: int ( в том числе short , long, long long) .
 Операции: арифметические, сравнения.
-Операторы: присваивания и for простейшей формы .
-Операнды:  простые переменные и константы.
-Константы: целые в 10   c/c  и 16   c/c .
-*/
+Операторы: составной, пустой, присваивания и for простейшей формы .
+Операнды: простые переменные и константы.
+Константы: целые в 10 c/c и 16 c/c .
+ */
 
-TypeLex keyWord[MAX_NUM_KEY_WORD] = {"for","int","long","short","return"};
-int indexKeyWord[MAX_NUM_KEY_WORD] = {TFor,TInt,TLong,TShort,TReturn};
+TypeLex keyWord[MAX_NUM_KEY_WORD] = {"for", "int", "long", "short", "return"};
+int indexKeyWord[MAX_NUM_KEY_WORD] = {TFor, TInt, TLong, TShort, TReturn};
 
-Scanner::Scanner(const char *fileName){
+Scanner::Scanner(const char *fileName) {
     getData(fileName);
     uk = 0;
     pos = 0;
@@ -66,6 +67,12 @@ void Scanner::printError(const std::string &error) {
     exit(1);
 }
 
+void Scanner::printError(const std::string &error, bool needExit) {
+    printError(error);
+    if (needExit)
+        exit(1);
+}
+
 void Scanner::printWarning(const std::string &error) {
     std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << error << "\n";
 }
@@ -91,11 +98,11 @@ void Scanner::printWarningTypes(int type1, int type2, int typeWarning) {
 }
 
 void Scanner::printError(std::string error, TypeLex lex) {
-    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " ) \n";
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ,найдено  " << lex << "  \n";
     exit(1);
 }
 
-void Scanner::printError(std::string error, TypeLex lex, bool needExit) {
+void Scanner::printError(std::string error, const char *lex, bool needExit) {
     std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ( " << lex << " ) \n";
     if (needExit)
         exit(1);
@@ -116,7 +123,6 @@ void Scanner::printWarning(int typeError, TypeLex lex) {
             if (lex != nullptr)
                 std::cout << lex;
             std::cout << std::endl;
-            break;
             break;
         default:
             printf("Неизвестная ошибка %d\n", typeError);
@@ -140,13 +146,13 @@ void Scanner::printError(int typeError) {
             printf("Константа из нескольких цифр начинается с нуля.\n");
             break;
         default:
-            printf("Неизвестная ошибка %d\n",typeError);
+            printf("Неизвестная ошибка %d\n", typeError);
             break;
     }
     exit(1);
 }
 
-int Scanner::scanner(TypeLex lex)  {
+int Scanner::scanner(TypeLex lex) {
     memset(lex, '\0', MAX_LEX);
     int i = 0;
     //Пропускаем игнорируемые символы
@@ -160,31 +166,31 @@ int Scanner::scanner(TypeLex lex)  {
             uk++;
         }
         //Пропускаем игнорируемые символы(комментарий однострочный)
-        if ((t[uk] == '/') &&  (t[uk + 1] == '/')) {
+        if ((t[uk] == '/') && (t[uk + 1] == '/')) {
             uk += 2;
             while (t[uk] != '\n' && t[uk] != '\0')
                 uk++;
 
-        } else{
+        } else {
             break;
         }
     }
 
-    if(t[uk] == '\0')
+    if (t[uk] == '\0')
         return TEnd;
 
-    if(isLetter(t[uk])){
+    if (isLetter(t[uk])) {
         lex[i++] = t[uk++];
         pos++;
-        while(isLetter(t[uk]) || isDigit10(t[uk])){
-            if(i < MAX_LEX-1){
+        while (isLetter(t[uk]) || isDigit10(t[uk])) {
+            if (i < MAX_LEX - 1) {
                 lex[i++] = t[uk];
-            }
-            else if (i == MAX_LEX - 1){
+            } else if (i == MAX_LEX - 1) {
                 i++;
                 printWarning(WLongId);
             }
-            uk++;pos++;
+            uk++;
+            pos++;
         }
         for (int j = 0; j < MAX_NUM_KEY_WORD; j++) {
             if (strcmp(lex, keyWord[j]) == 0)
@@ -192,30 +198,29 @@ int Scanner::scanner(TypeLex lex)  {
         }
 
         return TIdent;
-    }
-    else if (isDigit10(t[uk])){
+    } else if (isDigit10(t[uk])) {
         //Если начинается с нуля
-        if(t[uk] == '0'){
+        if (t[uk] == '0') {
             //Если начинается с "0x 0X", 16cc константа
-            if(t[uk+1] == 'x' || t[uk+1] == 'X'){
+            if (t[uk + 1] == 'x' || t[uk + 1] == 'X') {
                 uk += 2;
-                while(isDigit16(t[uk])){
+                while (isDigit16(t[uk])) {
                     lex[i++] = t[uk++];
                     pos++;
-                    if (i > getSize(MAX_LONGLONG_16)) {
+                    if (i > SIZE_MAX_LONGLONG_16) {
                         printError(ELongIntConst);
                         return TErr;
                     }
                 }
                 //Если после 0x не число
-                if(i == 0){
+                if (i == 0) {
                     printError(EWrongConst16);
                     return TErr;
                 }
                 return TConst16;
             }
             //Если после 0 ещё цифры
-            if(isDigit10(t[uk+1])){
+            if (isDigit10(t[uk + 1])) {
                 printError(EConst10StartFrom0);
                 return TErr;
             }
@@ -223,20 +228,18 @@ int Scanner::scanner(TypeLex lex)  {
             lex[i++] = t[uk++];
             pos++;
             return TConst10;
-        }
-        else{
-            while(isDigit10(t[uk])){
+        } else {
+            while (isDigit10(t[uk])) {
                 lex[i++] = t[uk++];
                 pos++;
-                if (i > getSize(MAX_LONGLONG_10)) {
+                if (i > SIZE_MAX_LONGLONG_10) {
                     printError(ELongIntConst);
                     return TErr;
                 }
             }
             return TConst10;
         }
-    }
-    else if (t[uk] == '+') {
+    } else if (t[uk] == '+') {
         lex[i++] = t[uk++];
         pos++;
         if (t[uk] != '+')
@@ -247,8 +250,7 @@ int Scanner::scanner(TypeLex lex)  {
             return TAddSelf;
         }
 
-    }
-    else if (t[uk] == '-') {
+    } else if (t[uk] == '-') {
         lex[i++] = t[uk++];
         pos++;
         if (t[uk] != '-')
@@ -277,11 +279,11 @@ int Scanner::scanner(TypeLex lex)  {
     } else if (t[uk] == '=') {
         lex[i++] = t[uk++];
         pos++;
-        if (t[uk] == '='){
+        if (t[uk] == '=') {
             lex[i++] = t[uk++];
             pos++;
             return TEQ;
-        }else
+        } else
             return TSave;
 
     } else if (t[uk] == '>') {
@@ -335,17 +337,18 @@ int Scanner::scanner(TypeLex lex)  {
         lex[i++] = t[uk++];
         pos++;
         return TRightFigSkob;
-    }else if (t[uk] == ',') {
+    } else if (t[uk] == ',') {
         lex[i++] = t[uk++];
         pos++;
         return TZpt;
-    }else if (t[uk] == ';') {
+    } else if (t[uk] == ';') {
         lex[i++] = t[uk++];
         pos++;
         return TTZpt;
     }
     lex[i++] = t[uk++];
     pos++;
+    printf("%c", t[uk]);
     printError(EWrongChar);
     return TErr;
 }
@@ -353,6 +356,12 @@ int Scanner::scanner(TypeLex lex)  {
 void Scanner::newLine() {
     line++;
     pos = 0;
+}
+
+void Scanner::setUK(int set_uk, int set_line, int set_pos) {
+    uk = set_uk;
+    line = set_line;
+    pos = set_pos;
 }
 
 void Scanner::setUK(int i) {
@@ -367,20 +376,10 @@ int Scanner::getUK() {
     return uk;
 }
 
-int Scanner::getPos() {
-    return pos;
-}
-
-void Scanner::setPos(int _pos) {
-    pos = _pos;
-}
-
-int Scanner::getLine() {
-    return line;
-}
-
-void Scanner::setLine(int _line) {
-    line = _line;
+void Scanner::getUK(int &get_uk, int &get_line, int &get_pos) {
+    get_uk = uk;
+    get_line = line;
+    get_pos = pos;
 }
 
 /*
@@ -388,39 +387,14 @@ void Scanner::setLine(int _line) {
 #define TDataShort 2
 #define TDataLong 3
 #define TDataLongLong 4
-*/
-int Scanner::getTypeConst(TypeLex lex, int typeConst, bool isShort) {
-    int size = getSize(lex);
-    if (typeConst == TConst10) {
-        //TODO:Убрать isShort
-        if (isShort &&
-            (size < getSize(MAX_SHORT_10) || (size == getSize(MAX_SHORT_10) && strcmp(lex, MAX_SHORT_10) <= 0))) {
-            return TDataShort;
-        } else if (size < getSize(MAX_INT_10) || (size == getSize(MAX_INT_10) && strcmp(lex, MAX_INT_10) <= 0)) {
-            return TDataInt;
-        } else if (size < getSize(MAX_LONGLONG_10) ||
-                   (size == getSize(MAX_LONGLONG_10) && strcmp(lex, MAX_LONGLONG_10) <= 0)) {
-            return TDataLongLong;
-        } else {
-            this->printError(ELongIntConst);
-            return 0;
-        }
-    }
-    if (typeConst == TConst16) {
-        if (isShort &&
-            (size < getSize(MAX_SHORT_16) || (size == getSize(MAX_SHORT_16) && strcmp(lex, MAX_SHORT_16) <= 0))) {
-            return TDataShort;
-        } else if (size < getSize(MAX_INT_16) || (size == getSize(MAX_INT_16) && strcmp(lex, MAX_INT_16) <= 0)) {
-            return TDataInt;
-        } else if (size < getSize(MAX_LONGLONG_16) ||
-                   (size == getSize(MAX_LONGLONG_16) && strcmp(lex, MAX_LONGLONG_16) <= 0)) {
-            return TDataLongLong;
-        } else {
-            this->printError(ELongIntConst);
-            return 0;
-        }
-    }
+typeConst - 10cc or 16cc
+ */
 
+int Scanner::getTypeConst(long long constanta, int typeConst) {
+    if (INT32_MIN < constanta && constanta < INT32_MAX)
+        return TDataInt;
+    else
+        return TDataLongLong;
 }
 
 

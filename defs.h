@@ -1,7 +1,3 @@
-//
-// Created by artem on 02.10.2019.
-//
-
 #ifndef COMPC___DEFS_H
 #define COMPC___DEFS_H
 
@@ -18,14 +14,10 @@
 
 // Максимальное количество ключевых слов
 #define MAX_NUM_KEY_WORD 5
-const char MAX_SHORT_10[] = {'3', '2', '7', '6', '7', '\0'};
-const char MAX_SHORT_16[] = {'f', 'f', '\0'};
 
-const char MAX_INT_10[] = {"2147483647\0"};
-const char MAX_INT_16[] = {'f', 'f', 'f', 'f', '\0'};
+#define SIZE_MAX_LONGLONG_10 22
 
-const char MAX_LONGLONG_10[] = {"9223372036854775807\0"};
-const char MAX_LONGLONG_16[] = {'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', '\0'};
+#define SIZE_MAX_LONGLONG_16 16
 //Ключевые слова
 #define TFor 1
 #define TReturn 2
@@ -135,6 +127,55 @@ typedef char TypeLex[MAX_LEX];
 #define netermExpr51 129
 #define netermExpr6 130
 #define netermFuncCallOrVar 131
+
+
+// ----------------------------------- Дельты -----------------------------------
+
+// записать в дерево функцию.
+// Создание доп.уровня для функции (в дополнение к будущему уровню блока)
+#define DEL_SetFunc -101
+// Записать переменную в дерево
+#define DEL_SetVar -102
+
+// установить флаг описания данных и запомнить тип в глобальной переменной dataType.
+#define DEL_StartDecl -105
+
+//  сбросить флаг описания данных
+#define DEL_EndDecl -106
+
+// добавить в дерево 2 пустые вершины (левую и правую) для блока
+#define DEL_SetBlock -110
+
+// выход из текущего уровня (конец блока)
+#define DEL_EndBlock -111
+
+// выход c уровня функции (конец блока + спец.вершин для ф-ии)
+#define DEL_EndFunc -112
+
+// найти в дереве функцию/переменную
+#define DEL_FindFunc -120
+#define DEL_FindVar -121
+
+// проверка возвращаемого значения.
+#define DEL_ReturnCheck -130
+
+// приведение типов в присваивании.
+#define DEL_MatchLeft -140
+
+// приведение типов в выражении
+#define DEL_Match -150
+#define DEL_MatchCompare -151
+// ++ и -- для констант - запрещено
+#define DEL_CheckUnar -160
+
+// тип константы
+#define DEL_ConstType -170
+
+// положить тип в магазин типов.
+//#define DEL_PushType -180
+
+// Вызов функции
+#define DEL_CallFunc -190
 
 
 #endif //COMPC___DEFS_H
