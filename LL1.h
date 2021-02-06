@@ -18,8 +18,6 @@ private:
 
     int currentType;  // последний отсканированный тип
     TypeLex currentId;  // посдедний отсканированный идентификатор
-    TypeLex currentConst;  // последняя отсканированная константа
-    int currentConstType;  // тип последней отсканированной константы
 
 public:
     LL1(Scanner *s);

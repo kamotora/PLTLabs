@@ -38,7 +38,7 @@ int LL1::LL_1() {
                     z--; // стираем верхушку магазина
                 }
             } else {
-                sc->printError("неверный символ, ожидался", lex);
+                sc->printError("неверный символ, ожидался '" + codeToString(magazin[z]) + "'", lex);
                 return -1;
             }
         } else {

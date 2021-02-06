@@ -98,7 +98,7 @@ void Scanner::printWarningTypes(int type1, int type2, int typeWarning) {
 }
 
 void Scanner::printError(std::string error, TypeLex lex) {
-    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ,найдено  " << lex << "  \n";
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << " ,найдено  '" << lex << "'  \n";
     exit(1);
 }
 
