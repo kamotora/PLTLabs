@@ -2,6 +2,8 @@
 #include "defs.h"
 #include "Scanner.h"
 #include "LL1.h"
+// #include <windows.h>
+
 //#include "Scanner.cpp"
 //#include "Tree.cpp"
 //#include "LL1.cpp"
@@ -10,6 +12,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+//     SetConsoleOutputCP(CP_UTF8);
     Scanner *sc;
     const char *fileName = "input.cpp";
     if (argc <= 1)
