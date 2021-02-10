@@ -46,5 +46,8 @@ public:
     void printError(const std::string &error, bool needExit);
 
     void printError(std::string error, const char *lex, bool needExit);
+
+    // Сканировать следующие n лексем и вернуть указатель обратно
+    int *scanNextAndReturn(int n);
 };
 #endif //COMPC___SCANNER_H

@@ -3,8 +3,10 @@
 
 #include "defs.h"
 #include "Tree.h"
+#include "Semant.h"
 #include <iostream>
-
+#include <stdlib.h>
+//todo не работает с унарными - и +
 using namespace std;
 
 class LL1 {
@@ -12,12 +14,25 @@ private:
     int magazin[MAX_MAG];
     // указатель верхушки магазина
     int z = 0;
+    // стек указателей на вершины семантического дерева
+    Tree *treePointers[MAX_MAG];
+    // указатель стека вершин
+    int tpz = 0;
+    // стек типов
+    int types[MAX_MAG];
+    // указатель стека типов
+    int typz = 0;
 
+    // флаг описания данных
+    bool flagData;
     Scanner *sc;
     Tree *root;  // корень семантического дерева
-
     int currentType;  // последний отсканированный тип
-    TypeLex currentId;  // посдедний отсканированный идентификатор
+    TypeLex currentIdent;  // идентификатор
+    int currentTypeConst;
+    TypeLex currentConst;
+    bool wasConst = false;
+    int typeConst;
 
 public:
     LL1(Scanner *s);
@@ -41,6 +56,10 @@ public:
     bool expression51(int t, char *lex);
 
     string codeToString(int code);
+
+    void processingDelta(int delta);
+
+    void outTree();
 };
 
 

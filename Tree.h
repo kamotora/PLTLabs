@@ -3,12 +3,33 @@
 
 #include "defs.h"
 #include "Scanner.h"
+#include <memory>
 
 union DataValue {
     short dataAsShort;
     int dataAsInt;
     long dataAsLong;
     long long dataAsLongLong;
+};
+
+struct Position {
+    int uk;
+    int line;
+    int pos;
+
+    Position() {}
+
+    Position(int _uk, int _line, int _pos) {
+        uk = _uk;
+        line = _line;
+        pos = _pos;
+    }
+
+    void getValues(int &_uk, int &_line, int &_pos) {
+        _uk = uk;
+        _line = line;
+        _pos = pos;
+    }
 };
 
 struct Node {
@@ -18,7 +39,8 @@ struct Node {
     TypeLex id;
     // тип (int,short, long, long long)
     int typeData;
-    //DataValue dataValue; // значение
+    DataValue dataValue; // значение
+    Position funcPosition;
     bool init;
 
     Node() {
@@ -44,6 +66,11 @@ struct Node {
         init = false;
         memcpy(id, _id, strlen(_id) + 1);
     }
+
+    Node(int typeNode, const char *_id, int typeData, const Position &funcPosition) :
+            typeNode(typeNode), typeData(typeData), funcPosition(funcPosition) {
+        memcpy(id, _id, strlen(_id) + 1);
+    }
 };
 
 class Tree {
@@ -57,6 +84,8 @@ public:
     Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node);
 
     Tree();
+
+    ~Tree();
 
     //Создать левого потомка от текущей вершины this
     void setLeft(Node *data);
@@ -86,6 +115,43 @@ public:
     static void setCur(Tree *a);
 
     static Tree *getCur();
+
+    Node *getNode() const;
+
+    Tree *getUp() const;
+
+    Tree *getLeft() const;
+
+    Tree *getRight() const;
+
+
+    // ------------------------ Семантические подпрограммы ------------------------
+
+    // проверка идентификатора на повторное описание внутри блока
+    int dupControl(Tree *addr, TypeLex id);
+
+    static void semSetTypeData(Tree *addr, int typeData);
+
+    static void semSetTypeNode(Tree *addr, int typeNode);
+
+    // найти в таблице переменную с именем а (сем11)
+    Tree *semGetVar(TypeLex a, Scanner *sc);
+
+    // найти в таблице функцию с именем а (сем10)
+    Tree *semGetFunc(char *a, Scanner *sc);
+
+    // Добавить переменную или функцию (сем1),(сем3)
+    Tree *semAddNode(char *id, int typeNode, int typeData, Scanner *sc);
+
+    Tree *semAddNode(Node *node);
+
+    Tree *semAddBlock();
+
+    static void FreeTree(Tree *tree);
+
+    Tree *findPlaceForDupFunc(Tree *root);
+
+    void delBlock(Tree *tree, bool itsFunc);
 };
 
 

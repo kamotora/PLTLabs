@@ -397,5 +397,16 @@ int Scanner::getTypeConst(long long constanta, int typeConst) {
         return TDataLongLong;
 }
 
+int *Scanner::scanNextAndReturn(int n) {
+    int *lexems = new int[n];
+    TypeLex ignored;
+    int tempUk = getUK();
+    for (int i = 0; i < n; ++i) {
+        lexems[i] = scanner(ignored);
+    }
+    setUK(tempUk);
+    return lexems;
+}
+
 
 
