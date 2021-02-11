@@ -2,6 +2,7 @@
 
 Tree *Tree::cur;
 long long create = 0, del = 0;
+
 Tree::Tree() {
     node = new Node(TNodeEmpty);
     up = NULL;
@@ -94,7 +95,6 @@ Tree *Tree::findUpOneLevel(Tree *from, char *id) {
 
 // отладочная программа печати дерева
 void Tree::printTree() {
-
     if (node->typeNode != TNodeEmpty) {
 
         printf("Вершина с данными %s ", node->id);
@@ -128,14 +128,6 @@ void Tree::setCur(Tree *a) {
 
 Tree *Tree::getCur() {
     return Tree::cur;
-}
-
-void Tree::semSetTypeNode(Tree *addr, int typeNode) {
-    addr->node->typeNode = typeNode;
-}
-
-void Tree::semSetTypeData(Tree *addr, int typeData) {
-    addr->node->typeData = typeData;
 }
 
 // проверка идентификатора на повторное описание внутри блока
@@ -182,18 +174,6 @@ Tree *Tree::semAddNode(TypeLex id, int typeNode, int typeData, Scanner *sc) {
     return cur;
 }
 
-Tree *Tree::semAddNode(Node *node) {
-    cur->setLeft(new Node(node->typeNode, node->id, node->typeData, node->funcPosition));
-    cur = cur->left;
-    if (node->typeNode == TNodeFunction) {
-        // точка возврата после выхода из функции
-        cur->setRight(new Node(TNodeEmpty));
-        //cur = cur->right;
-        return cur;
-    }
-    return cur;
-}
-
 //Возвращает указатель на блок
 Tree *Tree::semAddBlock() {
     if (cur == nullptr)
@@ -210,33 +190,6 @@ Tree *Tree::semAddBlock() {
 
 Node *Tree::getNode() const {
     return node;
-}
-
-void Tree::delBlock(Tree *tree, bool itsFunc) {
-    //Удаляем указатель на данное поддерево
-    (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
-    if (!itsFunc)
-        setCur(tree->up);
-    else
-        itsFunc = false;
-    //Удаляем само поддерево
-    FreeTree(tree);
-}
-
-void Tree::FreeTree(Tree *tree) {
-    if (tree == nullptr)
-        return;
-    if (tree->left) FreeTree(tree->left);
-    if (tree->right) FreeTree(tree->right);
-    (tree->up->left == tree) ? tree->up->left = nullptr : tree->up->right = nullptr;
-    //printf("Удалили %s\n", tree->getNode()->id);
-    delete tree;
-}
-
-Tree *Tree::findPlaceForDupFunc(Tree *root) {
-    while (root->left)
-        root = root->left;
-    return root;
 }
 
 

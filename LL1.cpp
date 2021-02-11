@@ -58,19 +58,13 @@ int LL1::LL_1() {
 
                 case netermDescription:
                     if (t == TShort || t == TInt || t == TLong) {
-                        TypeLex lex1;
-                        int tmpUk = sc->getUK();
-                        int lexems[5];
-                        for (int i = 0; i < 5; i++)
-                            lexems[i] = sc->scanner(lex1);
-//                        int *lexems = sc->scanNextAndReturn(5);
+                        int *lexems = sc->scanNextAndReturn(5);
                         bool isFunc = false;
                         for (int i = 1; i < 5; i++)
                             if (lexems[i] == TLeftRoundSkob && lexems[i - 1] == TIdent) {
                                 isFunc = true;
                                 break;
                             }
-                        sc->setUK(tmpUk);
                         if (isFunc) {
                             magazin[z++] = DEL_EndDecl;
                             magazin[z++] = DEL_EndFunc;
@@ -88,7 +82,6 @@ int LL1::LL_1() {
                     break;
 
                 case netermType:
-                    //todo здесь глянуть
                     magazin[z++] = DEL_StartDecl;
                     if (t == TShort) {
                         // Запоминаем тип
@@ -267,6 +260,12 @@ int LL1::LL_1() {
                         magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TSubSelf;
+                    } else if (t == TPlus) {
+                        magazin[z++] = netermExpr6;
+                        magazin[z++] = TPlus;
+                    } else if (t == TMinus) {
+                        magazin[z++] = netermExpr6;
+                        magazin[z++] = TMinus;
                     } else {
                         magazin[z++] = netermExpr51;
                         magazin[z++] = netermExpr6;
@@ -334,6 +333,7 @@ void LL1::processingDelta(int delta) {
             root->setCur(root->getCur()->getRight());
             break;
         }
+
         case DEL_EndFunc: {
             root->setCur(treePointers[--tpz]);
             break;
@@ -372,12 +372,8 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_MatchLeft: {
-            if (typz < 2) {
-                //printf("Недостаточно типов в магазине\n");
-                return;
-            }
-            int second = types[--typz];
-            int first = types[--typz];
+            int second = subTypesStack();
+            int first = subTypesStack();
             if (second > first) {
                 sc->printWarningTypes(first, second, WSmallType);
             }
@@ -385,23 +381,15 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_MatchCompare: {
-            if (typz < 2) {
-                //sc->printError("Недостаточно типов в магазине");
-                return;
-            }
-            int second = types[--typz];
-            int first = types[--typz];
+            int second = subTypesStack();
+            int first = subTypesStack();
             types[typz++] = TDataInt;
             break;
         }
 
         case DEL_Match: {
-            if (typz < 2) {
-                sc->printError("Недостаточно типов в магазине");
-                return;
-            }
-            int second = types[--typz];
-            int first = types[--typz];
+            int second = subTypesStack();
+            int first = subTypesStack();
             types[typz++] = first > second ? first : second;
             break;
         }
@@ -423,7 +411,7 @@ void LL1::processingDelta(int delta) {
                 sc->printError("Не найдено функции в DEL_ReturnCheck");
             int func, expression;
             func = cur->typeData;
-            expression = types[--typz];
+            expression = subTypesStack();
             if (expression > func) {
                 sc->printWarningTypes(expression, func, WDifferentTypesFunc);
             }
@@ -447,6 +435,12 @@ void LL1::processingDelta(int delta) {
             break;
         }
     }
+}
+
+int LL1::subTypesStack() {
+    if (typz == 0)
+        sc->printError("Недостаточно типов в магазине");
+    return types[--typz];
 }
 
 bool LL1::expression11(int t, TypeLex lex, int add) {

@@ -3,10 +3,9 @@
 
 #include "defs.h"
 #include "Tree.h"
-#include "Semant.h"
 #include <iostream>
 #include <stdlib.h>
-//todo не работает с унарными - и +
+
 using namespace std;
 
 class LL1 {
@@ -60,6 +59,8 @@ public:
     void processingDelta(int delta);
 
     void outTree();
+
+    int subTypesStack();
 };
 
 

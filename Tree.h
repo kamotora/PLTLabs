@@ -130,10 +130,6 @@ public:
     // проверка идентификатора на повторное описание внутри блока
     int dupControl(Tree *addr, TypeLex id);
 
-    static void semSetTypeData(Tree *addr, int typeData);
-
-    static void semSetTypeNode(Tree *addr, int typeNode);
-
     // найти в таблице переменную с именем а (сем11)
     Tree *semGetVar(TypeLex a, Scanner *sc);
 
@@ -143,15 +139,8 @@ public:
     // Добавить переменную или функцию (сем1),(сем3)
     Tree *semAddNode(char *id, int typeNode, int typeData, Scanner *sc);
 
-    Tree *semAddNode(Node *node);
-
     Tree *semAddBlock();
 
-    static void FreeTree(Tree *tree);
-
-    Tree *findPlaceForDupFunc(Tree *root);
-
-    void delBlock(Tree *tree, bool itsFunc);
 };
 
 
