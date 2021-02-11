@@ -347,14 +347,14 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_SetBlock: {
-            treePointers[tpz++] = root->getCur();
-            root->semAddBlock();
+            treePointers[tpz++] = root->semAddBlock(); // todo проверить при внезапных ошибках
+//            root->semAddBlock();
             break;
         }
 
 
         case DEL_EndBlock: {
-            root->setCur(treePointers[--tpz]);
+            root->setCur(treePointers[--tpz]); //todo при проблемах вернуть --tpz
             break;
         }
 

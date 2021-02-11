@@ -1,5 +1,5 @@
 #include "Scanner.h"
-#include <cstring>
+
 
 /**
 Программа: главная программа языка С++. Допускается описание функций без параметров, функции возвращают значение.
@@ -63,7 +63,7 @@ void Scanner::getData(const char *FileName) {
 }
 
 void Scanner::printError(const std::string &error) {
-    std::cout << "Ошибка! " << error << "\n";
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << "\n";
     exit(1);
 }
 
@@ -391,8 +391,11 @@ typeConst - 10cc or 16cc
  */
 
 int Scanner::getTypeConst(long long constanta, int typeConst) {
-    if (INT32_MIN < constanta && constanta < INT32_MAX)
-        return TDataInt;
+    constanta = std::abs(constanta);
+    if (constanta < INT16_MAX)
+        return TDataShort;
+    if (constanta < INT32_MAX)
+        return TDataInt; // todo long == int
     else
         return TDataLongLong;
 }

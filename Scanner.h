@@ -2,15 +2,20 @@
 #define COMPC___SCANNER_H
 
 #include "defs.h"
+#include <cstring>
+#include <cmath>
 
-class Scanner{
+class Scanner {
 private:
     //сканируемый модуль
     TypeMod t;
-    int pos,line;
+    int pos, line;
     int tmpPos, tmpLine;
+
     static bool isDigit10(char ch);
+
     static bool isLetter(char ch);
+
     static bool isDigit16(char ch);
 public:
     int uk;
