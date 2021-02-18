@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     type = sc->scanner(lex);
 
     if (type == TEnd)
-        printf("Синтаксических ошибок не обнаружено. \n");
+        cout << "Синтаксических ошибок не обнаружено. \n";
     else
         sc->printError("Лишний текст в конце программы.");
     return 0;

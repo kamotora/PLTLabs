@@ -30,7 +30,7 @@ private:
     TypeLex currentIdent;  // идентификатор
     int currentTypeConst;
     TypeLex currentConst;
-    bool wasConst = false;
+    bool wasVariable = false;
     int typeConst;
 
 public:

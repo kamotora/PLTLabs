@@ -62,19 +62,10 @@ void Scanner::getData(const char *FileName) {
     fclose(in);
 }
 
-void Scanner::printError(const std::string &error) {
-    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << "\n";
-    exit(1);
-}
-
 void Scanner::printError(const std::string &error, bool needExit) {
-    printError(error);
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ": " << error << "\n";
     if (needExit)
         exit(1);
-}
-
-void Scanner::printWarning(const std::string &error) {
-    std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ": " << error << "\n";
 }
 
 void Scanner::printWarningTypes(int type1, int type2, int typeWarning) {
@@ -108,12 +99,8 @@ void Scanner::printError(std::string error, const char *lex, bool needExit) {
         exit(1);
 }
 
-void Scanner::printNum() {
-    std::cout << "Строка " << line << ", позиция " << pos << ": ";
-}
-
 void Scanner::printWarning(int typeError, TypeLex lex) {
-    printf("Предупреждение!  Строка %d, позиция %d. ", line, pos);
+    std::cout << "Предупреждение!  Строка " << line << ", позиция " << pos << ". ";
     switch (typeError) {
         case WLongId :
             std::cout << "Слишком длинный идентификатор. Его длина будет ограничена " << MAX_LEX << " символами\n";
@@ -125,28 +112,28 @@ void Scanner::printWarning(int typeError, TypeLex lex) {
             std::cout << std::endl;
             break;
         default:
-            printf("Неизвестная ошибка %d\n", typeError);
+            std::cout << "Неизвестная ошибка " << typeError << std::endl;
             break;
     }
 }
 
 void Scanner::printError(int typeError) {
-    printf("Ошибка! Строка %d, позиция %d. ", line, pos);
+    std::cout << "Ошибка! Строка " << line << ", позиция " << pos << ". ";
     switch (typeError) {
         case EWrongChar :
-            printf("Недопустимый символ.\n");
+            std::cout << "Недопустимый символ." << std::endl;
             break;
         case ELongIntConst :
-            printf("Слишком длинная целая константа.\n");
+            std::cout << "Слишком длинная целая константа." << std::endl;
             break;
         case EWrongConst16 :
-            printf("Неверная константа в 16сс.\n");
+            std::cout << "Неверная константа в 16сс." << std::endl;
             break;
         case EConst10StartFrom0 :
-            printf("Константа из нескольких цифр начинается с нуля.\n");
+            std::cout << "Константа из нескольких цифр начинается с нуля." << std::endl;
             break;
         default:
-            printf("Неизвестная ошибка %d\n", typeError);
+            std::cout << "Неизвестная ошибка " << typeError << std::endl;
             break;
     }
     exit(1);
@@ -348,7 +335,7 @@ int Scanner::scanner(TypeLex lex) {
     }
     lex[i++] = t[uk++];
     pos++;
-    printf("%c", t[uk]);
+    std::cout << t[uk];
     printError(EWrongChar);
     return TErr;
 }

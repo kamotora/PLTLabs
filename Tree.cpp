@@ -15,7 +15,7 @@ Tree::Tree(Tree *_left, Tree *_right, Tree *_up, Node *_node) {
     left = _left;
     right = _right;
     node = _node;
-    //printf("Добавили %s\n", node->id);
+    //std::cout << "Добавили " << node->id << std::endl;
 }
 
 Tree::~Tree() {
@@ -97,25 +97,25 @@ Tree *Tree::findUpOneLevel(Tree *from, char *id) {
 void Tree::printTree() {
     if (node->typeNode != TNodeEmpty) {
 
-        printf("Вершина с данными %s ", node->id);
+        std::cout << "Вершина с данными " << node->id;
 
         if (node->typeNode == TNodeVar)
-            printf(" переменная типа");
+            std::cout << " переменная типа ";
         if (node->typeNode == TNodeFunction)
-            printf(" функция возвр.тип ");
-        printf(" %s", TDataToName(node->typeData).c_str());
+            std::cout << " функция возвр.тип ";
+        std::cout << TDataToName(node->typeData).c_str();
 
     } else
-        printf("Пустая вершина %s ", node->id);
-    printf("\n");
+        std::cout << "Пустая вершина " << node->id << " ";
+    std::cout << std::endl;
 
     if (right != NULL) {
-        printf("справа: от %s: ", node->id);
+        std::cout << "справа: от " << node->id << " : ";
         right->printTree();
     }
 
     if (left != NULL) {
-        printf("слева от %s: ", node->id);
+        std::cout << "слева от " << node->id << " : ";
         left->printTree();
     }
 

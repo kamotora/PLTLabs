@@ -270,7 +270,7 @@ int LL1::LL_1() {
                         magazin[z++] = netermExpr51;
                         magazin[z++] = netermExpr6;
                     }
-                    wasConst = false;
+                    wasVariable = false;
                     break;
                 case netermExpr51:
                     if (!expression51(t, lex))
@@ -310,9 +310,9 @@ int LL1::LL_1() {
             z--;
         }
     }
-    printf("// !----- Вывод дерева ----- //\n");
+    cout << "// !----- Вывод дерева ----- //\n";
     root->printTree();
-    printf("// !----- Конец вывода дерева ----- //\n");
+    cout << "// !----- Конец вывода дерева ----- //\n";
     return 123;
 }
 
@@ -340,6 +340,7 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_FindVar: {
+            wasVariable = true;
             Tree *var = root->semGetVar(currentIdent, sc);
             if (var != nullptr)
                 types[typz++] = var->getNode()->typeData;
@@ -395,8 +396,8 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_CheckUnar: {
-            if (wasConst) {
-                sc->printError("Попытка применить операторы ++ или -- к константе", false);
+            if (!wasVariable) {
+                sc->printError("Попытка применить операторы ++ или -- не к переменной", false);
             }
             break;
         }

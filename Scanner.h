@@ -28,15 +28,9 @@ public:
 
     void printError(int typeError);
 
-    void printWarning(const std::string &error);
-
     void setUK(int i);
 
-    void printError(const std::string &error);
-
     void printError(std::string error, char *lex);
-
-    void printNum();
 
     void printWarningTypes(int type1, int type2, int typeWarning);
 
@@ -48,7 +42,7 @@ public:
 
     void getUK(int &get_uk, int &get_line, int &get_pos);
 
-    void printError(const std::string &error, bool needExit);
+    void printError(const std::string &error, bool needExit = true);
 
     void printError(std::string error, const char *lex, bool needExit);
 
