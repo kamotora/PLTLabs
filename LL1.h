@@ -5,6 +5,9 @@
 #include "Tree.h"
 #include <iostream>
 #include <stdlib.h>
+#include "stack"
+#include "Triad.h"
+#include "vector"
 
 using namespace std;
 
@@ -18,20 +21,28 @@ private:
     // указатель стека вершин
     int tpz = 0;
     // стек типов
-    int types[MAX_MAG];
-    // указатель стека типов
-    int typz = 0;
+    vector<pair<int, int>> types; // todo избавиться, т.к. не нужен более
 
     // флаг описания данных
     bool flagData;
     Scanner *sc;
     Tree *root;  // корень семантического дерева
-    int currentType;  // последний отсканированный тип
-    TypeLex currentIdent;  // идентификатор
-    int currentTypeConst;
-    TypeLex currentConst;
-    bool wasVariable = false;
-    int typeConst;
+    int currentTypeData;  // последний отсканированный тип (int, long...)
+    int currentTypeNode;  // последний отсканированный тип (идентификатор или константа)
+    TypeLex currentIdentOrConst;  // последний идентификатор или константа
+
+    vector<Triad *> triads;  //список сгенерированных триад
+    vector<int> writeTriadAddress;  // список адресов триад, которые нужно дописать
+    vector<Operand *> operands;  //стек результатов
+    vector<int> returnAddress;  // стек адресов возврата (для for)
+    vector<int> loopTriads;
+
+    bool isDelta(int t);
+
+    bool isGenFunc(int t);
+
+    template<typename T>
+    T getTopValue(vector<T> &st, const string &name);
 
 public:
     LL1(Scanner *s);
@@ -61,6 +72,39 @@ public:
     void outTree();
 
     int subTypesStack();
+
+    void pushType(int dataType, int nodeType);
+
+    void pushType(Tree *pTree);
+
+    void processingGenFunc(int t);
+
+
+    void outOneOperand(Operand *operand);
+
+    void outOneTriad(Triad *triad);
+
+    void outTriads();
+
+    void outOperands();
+
+    string codeOperationToString(int code);
+
+    void generateArithmeticTriad(int operation);
+
+    Operand *getOperand();
+
+    int getReturnAddress();
+
+    Triad *getCastTypeTriad(int castableType, int typeToCast, Operand *operandForCast);
+
+    int getTypeDataOperand(Operand *operand);
+
+    int getTypeDataTriad(Triad *&pTriad);
+
+    int getLastTriadAddr() const;
+
+    static string getUniqueLabel(int len);
 };
 
 

@@ -377,7 +377,7 @@ void Scanner::getUK(int &get_uk, int &get_line, int &get_pos) {
 typeConst - 10cc or 16cc
  */
 
-int Scanner::getTypeConst(long long constanta, int typeConst) {
+int Scanner::getTypeConst(long long constanta) {
     constanta = std::abs(constanta);
     if (constanta < INT16_MAX)
         return TDataShort;

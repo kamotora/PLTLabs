@@ -1,5 +1,8 @@
 #include "defs.h"
 
+TypeLex prolog = "Prolog";
+TypeLex epilog = "Epilog";
+
 std::string TDataToName(int TData) {
     switch (TData) {
         case TDataInt :
@@ -10,6 +13,10 @@ std::string TDataToName(int TData) {
             return "long long";
         case TDataShort :
             return "short";
+        case TDataUndefined :
+            return "undefined";
+        default:
+            std::cerr << "invalid data type: " << TData << std::endl;
     }
 }
 

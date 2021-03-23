@@ -36,7 +36,7 @@ public:
 
     void printWarning(int typeError, char *lex = nullptr);
 
-    int getTypeConst(long long int constanta, int typeConst);
+    int getTypeConst(long long constanta);
 
     void setUK(int i, int line, int pos);
 

@@ -3,4 +3,4 @@ project(compC__)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(compC__ main.cpp defs.h Scanner.h Scanner.cpp Tree.cpp Tree.h defs.cpp LL1.cpp LL1.h)
+add_executable(compC__ main.cpp defs.h Scanner.h Scanner.cpp Tree.cpp Tree.h defs.cpp LL1.cpp LL1.h Triad.cpp Triad.h exception/InvalidGenFuncError.cpp exception/InvalidGenFuncError.h exception/EmptyCollectionError.cpp exception/EmptyCollectionError.h)

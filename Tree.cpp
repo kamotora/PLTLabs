@@ -103,7 +103,7 @@ void Tree::printTree() {
             std::cout << " переменная типа ";
         if (node->typeNode == TNodeFunction)
             std::cout << " функция возвр.тип ";
-        std::cout << TDataToName(node->typeData).c_str();
+        std::cout << TDataToName(node->typeData);
 
     } else
         std::cout << "Пустая вершина " << node->id << " ";

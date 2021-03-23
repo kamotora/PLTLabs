@@ -1,4 +1,6 @@
 #include "LL1.h"
+#include "Node.h"
+#include "exception/EmptyCollectionError.h"
 
 LL1::LL1(Scanner *s) {
     sc = s;
@@ -8,8 +10,12 @@ LL1::LL1(Scanner *s) {
     Tree::cur = root;
 }
 
-bool isDelta(int t) {
-    return t <= DEL_SetFunc;
+bool LL1::isDelta(int t) {
+    return t <= DEL_SetFunc && !isGenFunc(t);
+}
+
+bool LL1::isGenFunc(int t) {
+    return t <= GEN_PUSH;
 }
 
 int LL1::LL_1() {
@@ -44,6 +50,9 @@ int LL1::LL_1() {
         } else if (isDelta(magazin[z])) {
             processingDelta(magazin[z]);
             z--;
+        } else if (isGenFunc(magazin[z])) {
+            processingGenFunc(magazin[z]);
+            z--;
         } else {
             switch (magazin[z]) {
 
@@ -66,12 +75,14 @@ int LL1::LL_1() {
                                 break;
                             }
                         if (isFunc) {
+                            magazin[z++] = DELTA_GEN_ENDP;
                             magazin[z++] = DEL_EndDecl;
                             magazin[z++] = DEL_EndFunc;
                             magazin[z++] = netermSostOper;
                             magazin[z++] = TRightRoundSkob;
                             magazin[z++] = TLeftRoundSkob;
                             magazin[z++] = DEL_SetFunc;
+                            magazin[z++] = DELTA_GEN_PROC;
                             magazin[z++] = TIdent;
                             magazin[z++] = netermType;
                         } else
@@ -85,7 +96,7 @@ int LL1::LL_1() {
                     magazin[z++] = DEL_StartDecl;
                     if (t == TShort) {
                         // Запоминаем тип
-                        currentType = TDataShort;
+                        currentTypeData = TDataShort;
                         int *lexems = sc->scanNextAndReturn(1);
                         if (lexems[0] == TInt)
                             magazin[z++] = TInt;
@@ -94,23 +105,22 @@ int LL1::LL_1() {
                     } else if (t == TLong) {
                         int *lexems = sc->scanNextAndReturn(2);
                         if (lexems[0] == TLong) {
-                            currentType = TDataLongLong;
+                            currentTypeData = TDataLongLong;
                             if (lexems[1] == TInt)
                                 magazin[z++] = TInt;
                             magazin[z++] = TLong;
                         } else {
-                            currentType = TDataLong;
+                            currentTypeData = TDataLong;
                             if (lexems[0] == TInt)
                                 magazin[z++] = TInt;
                         }
                         delete lexems;
                         magazin[z++] = TLong;
                     } else if (t == TInt) {
-                        currentType = TDataInt;
+                        currentTypeData = TDataInt;
                         magazin[z++] = TInt;
                     } else
                         sc->printError("Неверный символ", lex);
-//                    magazin[z++] = netermType3;
                     break;
                 case netermData:
                     if (t == TShort || t == TInt || t == TLong) {
@@ -125,6 +135,7 @@ int LL1::LL_1() {
                     if (t == TIdent) {
                         magazin[z++] = netermList2;
                         magazin[z++] = netermAssign2;
+                        magazin[z++] = GEN_PUSH;
                         magazin[z++] = DEL_SetVar;
                         magazin[z++] = TIdent;
                     } else
@@ -141,6 +152,7 @@ int LL1::LL_1() {
                     break;
                 case netermAssign:
                     if (t == TSave) {
+                        magazin[z++] = DELTA_GEN_ASSIGNMENT;
                         magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TSave;
@@ -178,15 +190,22 @@ int LL1::LL_1() {
                     break;
                 case netermOper:
                     if (t == TFor) {
+                        magazin[z++] = GEN_FormIf;
+                        magazin[z++] = GEN_SET_ADDR_NOP; // end
+                        magazin[z++] = GEN_GoToStep; // goto step
                         magazin[z++] = netermOper;
+                        magazin[z++] = GEN_SET_ADDR; // body
                         magazin[z++] = TRightRoundSkob;
+                        magazin[z++] = GEN_GoToIf;
                         magazin[z++] = netermExpr1;
+                        magazin[z++] = GEN_SET_ADDR; // step
                         magazin[z++] = TTZpt;
+                        magazin[z++] = GEN_If;
                         magazin[z++] = netermExpr1;
+                        magazin[z++] = GEN_SET_ADDR; // conditional
                         magazin[z++] = TTZpt;
-                        // delta matchLeft
-                        //magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermAssign;
+                        magazin[z++] = GEN_PUSH;
                         // delta find
                         magazin[z++] = DEL_FindVar;
                         magazin[z++] = TIdent;
@@ -194,15 +213,15 @@ int LL1::LL_1() {
                         magazin[z++] = TFor;
                     } else if (t == TReturn) {
                         magazin[z++] = TTZpt;
+                        magazin[z++] = GEN_Return;
                         // delta returnCheck
                         magazin[z++] = DEL_ReturnCheck;
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TReturn;
                     } else if (t == TIdent) {
                         magazin[z++] = TTZpt;
-                        // delta matchLeft
-                        //magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermAssign;
+                        magazin[z++] = GEN_PUSH;
                         // delta find
                         magazin[z++] = DEL_FindVar;
                         magazin[z++] = TIdent;
@@ -251,12 +270,18 @@ int LL1::LL_1() {
                     break;
                 case netermExpr5:
                     if (t == TAddSelf) {
+                        magazin[z++] = GEN_PrefExpr;
                         // delta CheckUnar
+                        magazin[z++] = DELTA_GEN_PLUS;
+                        magazin[z++] = GEN_PUSH_ONE;
                         magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TAddSelf;
                     } else if (t == TSubSelf) {
+                        magazin[z++] = GEN_PrefExpr;
                         // delta CheckUnar
+                        magazin[z++] = DELTA_GEN_MINUS;
+                        magazin[z++] = GEN_PUSH_ONE;
                         magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TSubSelf;
@@ -264,13 +289,15 @@ int LL1::LL_1() {
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TPlus;
                     } else if (t == TMinus) {
+                        // -5 = -1 * 5
+                        magazin[z++] = DELTA_GEN_MUL;
                         magazin[z++] = netermExpr6;
+                        magazin[z++] = GEN_PUSH_MINUS_ONE;
                         magazin[z++] = TMinus;
                     } else {
                         magazin[z++] = netermExpr51;
                         magazin[z++] = netermExpr6;
                     }
-                    wasVariable = false;
                     break;
                 case netermExpr51:
                     if (!expression51(t, lex))
@@ -281,10 +308,12 @@ int LL1::LL_1() {
                         magazin[z++] = netermFuncCallOrVar;
                         magazin[z++] = TIdent;
                     } else if (t == TConst16) {
+                        magazin[z++] = GEN_PUSH;
                         // delta PushType && ConstType
                         magazin[z++] = DEL_ConstType;
                         magazin[z++] = TConst16;
                     } else if (t == TConst10) {
+                        magazin[z++] = GEN_PUSH;
                         // delta PushType && ConstType
                         magazin[z++] = DEL_ConstType;
                         magazin[z++] = TConst10;
@@ -297,11 +326,14 @@ int LL1::LL_1() {
                     break;
                 case netermFuncCallOrVar:
                     if (t == TLeftRoundSkob) {
+                        magazin[z++] = GEN_PUSH;
                         // delta PushType && CallFunc
+                        magazin[z++] = DEL_GEN_CALL;
                         magazin[z++] = DEL_CallFunc;
                         magazin[z++] = TRightRoundSkob;
                         magazin[z++] = TLeftRoundSkob;
                     } else {
+                        magazin[z++] = GEN_PUSH;
                         magazin[z++] = DEL_FindVar;
                         epsilon();
                     }
@@ -323,14 +355,16 @@ void LL1::processingDelta(int delta) {
         // --------------------------------------- Семантика ---------------------------------------
 
         case DEL_SetVar: {
-            root->semAddNode(currentIdent, TNodeVar, currentType, sc);
-            types[typz++] = currentType;
+            currentTypeNode = TNodeVar;
+            root->semAddNode(currentIdentOrConst, TNodeVar, currentTypeData, sc);
+            pushType(currentTypeData, TNodeVar);
             break;
         }
 
         case DEL_SetFunc: {
-            treePointers[tpz++] = root->semAddNode(currentIdent, TNodeFunction, currentType, sc);
+            treePointers[tpz++] = root->semAddNode(currentIdentOrConst, TNodeFunction, currentTypeData, sc);
             root->setCur(root->getCur()->getRight());
+            currentTypeNode = TNodeFunction;
             break;
         }
 
@@ -340,22 +374,22 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_FindVar: {
-            wasVariable = true;
-            Tree *var = root->semGetVar(currentIdent, sc);
-            if (var != nullptr)
-                types[typz++] = var->getNode()->typeData;
+            Tree *var = root->semGetVar(currentIdentOrConst, sc);
+//            operands.push_back(new Operand(var->getNode()));
+            currentTypeData = var->getNode()->typeData;
+            currentTypeNode = TNodeVar;
+            pushType(var);
             break;
         }
 
         case DEL_SetBlock: {
-            treePointers[tpz++] = root->semAddBlock(); // todo проверить при внезапных ошибках
-//            root->semAddBlock();
+            treePointers[tpz++] = root->semAddBlock();
             break;
         }
 
 
         case DEL_EndBlock: {
-            root->setCur(treePointers[--tpz]); //todo при проблемах вернуть --tpz
+            root->setCur(treePointers[--tpz]);
             break;
         }
 
@@ -373,10 +407,16 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_MatchLeft: {
-            int second = subTypesStack();
-            int first = subTypesStack();
-            if (second > first) {
-                sc->printWarningTypes(first, second, WSmallType);
+            //todo вынести общий код, а то не красиво как-то
+            int typeDataOperand1 = getTypeDataOperand(operands[operands.size() - 2]);
+            int typeDataOperand2 = getTypeDataOperand(operands[operands.size() - 1]);
+            if (typeDataOperand1 != typeDataOperand2) {
+                if (typeDataOperand1 > typeDataOperand2) {
+                    sc->printWarningTypes(typeDataOperand2, typeDataOperand1, WSmallType);
+                }
+                triads.push_back(getCastTypeTriad(typeDataOperand2, typeDataOperand1, operands[operands.size() - 1]));
+                operands.pop_back();
+                operands.push_back(new Operand(getLastTriadAddr()));
             }
             break;
         }
@@ -384,21 +424,31 @@ void LL1::processingDelta(int delta) {
         case DEL_MatchCompare: {
             int second = subTypesStack();
             int first = subTypesStack();
-            types[typz++] = TDataInt;
+            pushType(TDataInt, TNodeConst);
             break;
         }
 
         case DEL_Match: {
+            int typeDataOperand1 = getTypeDataOperand(operands[operands.size() - 2]);
+            int typeDataOperand2 = getTypeDataOperand(operands[operands.size() - 1]);
+            if (typeDataOperand1 > typeDataOperand2) {
+                triads.push_back(getCastTypeTriad(typeDataOperand2, typeDataOperand1, operands[operands.size() - 1]));
+                operands.pop_back();
+                operands.push_back(new Operand(getLastTriadAddr()));
+            } else if (typeDataOperand1 < typeDataOperand2) {
+                triads.push_back(getCastTypeTriad(typeDataOperand1, typeDataOperand2, operands[operands.size() - 2]));
+                operands.pop_back();
+                operands.push_back(new Operand(getLastTriadAddr()));
+            }
             int second = subTypesStack();
             int first = subTypesStack();
-            types[typz++] = first > second ? first : second;
+            pushType(first > second ? first : second, TNodeConst);
             break;
         }
 
         case DEL_CheckUnar: {
-            if (!wasVariable) {
+            if (types.empty() || types.back().second != TNodeVar)
                 sc->printError("Попытка применить операторы ++ или -- не к переменной", false);
-            }
             break;
         }
 
@@ -420,40 +470,186 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_CallFunc: {
-            Tree *func = root->semGetFunc(currentIdent, sc);
-            if (func != nullptr)
-                types[typz++] = func->getNode()->typeData;
+            Tree *func = root->semGetFunc(currentIdentOrConst, sc);
+            operands.push_back(new Operand(func->getNode()));
+            pushType(func);
             break;
         }
 
         case DEL_ConstType: {
-            if (currentTypeConst != TConst10 && currentTypeConst != TConst16)
-                sc->printError("Ошибка в DEL_ConstType, curTypeLex - не константа ",
-                               std::to_string(currentTypeConst).c_str(), false);
-            long long constanta = (currentTypeConst == TConst10) ? strtoull(currentConst, nullptr, 10) : strtoull(
-                    currentConst, nullptr, 16);
-            types[typz++] = sc->getTypeConst(constanta, typeConst);
+            long long constanta = (currentTypeData == TConst10) ? strtoull(currentIdentOrConst, nullptr, 10) : strtoull(
+                    currentIdentOrConst, nullptr, 16);
+            auto typeConst = sc->getTypeConst(constanta);
+            pushType(typeConst, TNodeConst);
+            currentTypeNode = TNodeConst;
+            currentTypeData = typeConst;
             break;
         }
     }
 }
 
+void LL1::pushType(int dataType, int nodeType) { types.push_back(make_pair(dataType, nodeType)); }
+
 int LL1::subTypesStack() {
-    if (typz == 0)
-        sc->printError("Недостаточно типов в магазине");
-    return types[--typz];
+    if (types.empty())
+        sc->printError("Недостаточно типов в магазине. Переменные в выражении не определены ранее");
+    int res = types.back().first;
+    types.pop_back();
+    return res;
+}
+
+void LL1::pushType(Tree *pTree) {
+    if (pTree == nullptr)
+        return;
+    pushType(pTree->getNode()->typeData, pTree->getNode()->typeNode);
+}
+
+void LL1::processingGenFunc(int t) {
+    switch (t) {
+        case GEN_PUSH:
+            // todo проверить в дебаге
+            operands.push_back(new Operand(new Node(currentTypeNode, currentIdentOrConst, currentTypeData)));
+            break;
+        case GEN_PUSH_ONE:
+            operands.push_back(new Operand(new Node(TNodeConst, "1", TDataShort)));
+            break;
+        case GEN_PUSH_MINUS_ONE:
+            operands.push_back(new Operand(new Node(TNodeConst, "-1", TDataShort)));
+            break;
+        case GEN_PUSH_ZERO:
+            operands.push_back(new Operand(new Node(TNodeConst, "0", TDataShort)));
+            break;
+        case GEN_StartFunc:
+            break;
+        case GEN_EndFunc:
+            break;
+        case DELTA_GEN_ASSIGNMENT:
+            generateArithmeticTriad(TRI_ASSIGNMENT);
+            break;
+        case GEN_Expr:
+            break;
+        case GEN_FormIf: {
+            int triad = getTopValue(loopTriads, "loopTriads");
+            // выход из цикла
+            Operand *operand2 = new Operand(getReturnAddress());
+            triads[triad]->setOperand2(operand2);
+            // переход к телу цикла
+            Operand *operand1 = new Operand(getReturnAddress());
+            triads[triad]->setOperand1(operand1);
+            break;
+        }
+        case GEN_GoToIf: {
+            auto condition = returnAddress[returnAddress.size() - 2];
+            triads.push_back(new Triad(TRI_JMP, new Operand(condition), nullptr));
+            break;
+        }
+        case GEN_GoToStep: {
+            auto body = getReturnAddress();
+            triads.push_back(new Triad(TRI_JMP, new Operand(getReturnAddress()), nullptr));
+            returnAddress.push_back(body);
+            break;
+        }
+        case GEN_SET_ADDR: {
+            triads.push_back(new Triad(TRI_UNIQUE_LABEL));
+            returnAddress.push_back(getLastTriadAddr());
+            break;
+        }
+        case GEN_SET_ADDR_NOP: {
+            triads.push_back(new Triad(TRI_NOP));
+            returnAddress.push_back(getLastTriadAddr());
+            break;
+        }
+        case GEN_If: {
+            // goto body (true) or end (false), адреса заполним позже
+            triads.push_back(new Triad(TRI_IF, nullptr, nullptr));
+            loopTriads.push_back(getLastTriadAddr());
+            break;
+        }
+        case GEN_Return: {
+            triads.push_back(new Triad(TRI_MOV, getOperand(), new Operand("eax")));
+            operands.push_back(new Operand(getLastTriadAddr()));
+            writeTriadAddress.push_back(getLastTriadAddr());
+            triads.push_back(new Triad(TRI_RET));
+            break;
+        }
+        case GEN_PrefExpr:
+            break;
+        case GEN_PostExpr:
+            break;
+        case DELTA_GEN_JNE: {
+            triads.push_back(new Triad(TRI_JNE, new Operand(getReturnAddress()), nullptr));
+            operands.push_back(new Operand(getLastTriadAddr()));
+            break;
+        }
+        case DELTA_GEN_CMP: {
+            generateArithmeticTriad(TRI_CMP);
+            break;
+        }
+        case DELTA_GEN_MUL: {
+            generateArithmeticTriad(TRI_MUL);
+            break;
+        }
+
+        case DELTA_GEN_DIV: {
+            generateArithmeticTriad(TRI_DIV);
+            break;
+        }
+
+        case DELTA_GEN_MOD: {
+            generateArithmeticTriad(TRI_MOD);
+            break;
+        }
+
+        case DELTA_GEN_PLUS: {
+            generateArithmeticTriad(TRI_PLUS);
+            break;
+        }
+
+        case DELTA_GEN_MINUS: {
+            generateArithmeticTriad(TRI_MINUS);
+            break;
+        }
+
+        case DEL_GEN_CALL: {
+            Operand *operand = getOperand();
+            triads.push_back(new Triad(TRI_CALL, operand, nullptr));
+            operands.push_back(new Operand(getLastTriadAddr()));
+            break;
+        }
+        case DELTA_WRITE_PROLOG: {
+            operands.push_back(new Operand(new Node(prolog)));
+            break;
+        }
+
+        case DELTA_WRITE_EPILOG: {
+            operands.push_back(new Operand(new Node(epilog)));
+            break;
+        }
+        case DELTA_GEN_PROC: {
+            triads.push_back(new Triad(TRI_PROC, new Operand(currentIdentOrConst), nullptr));
+            break;
+        }
+        case DELTA_GEN_ENDP: {
+            triads.push_back(new Triad(TRI_ENDP));
+            break;
+        }
+        default:
+            throw InvalidGenFuncError(t);
+    }
 }
 
 bool LL1::expression11(int t, TypeLex lex, int add) {
     if (t == TEQ) {
         magazin[z++] = netermExpr11 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_CMP;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr2 + add;
         magazin[z++] = TEQ;
     } else if (t == TNEQ) {
         magazin[z++] = netermExpr11 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_CMP;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr2 + add;
         magazin[z++] = TNEQ;
@@ -469,24 +665,28 @@ bool LL1::expression21(int t, TypeLex lex, int add) {
     if (t == TGE) {
         magazin[z++] = netermExpr21 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_CMP;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3;
         magazin[z++] = TGE;
     } else if (t == TGT) {
         magazin[z++] = netermExpr21 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_CMP;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TGT;
     } else if (t == TLE) {
         magazin[z++] = netermExpr21 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_CMP;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TLE;
     } else if (t == TLT) {
         magazin[z++] = netermExpr21 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_CMP;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TLT;
@@ -501,12 +701,14 @@ bool LL1::expression31(int t, TypeLex lex, int add) {
     if (t == TPlus) {
         magazin[z++] = netermExpr31 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_PLUS;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr4 + add;
         magazin[z++] = TPlus;
     } else if (t == TMinus) {
         magazin[z++] = netermExpr31 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_MINUS;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr4 + add;
         magazin[z++] = TMinus;
@@ -521,18 +723,21 @@ bool LL1::expression41(int t, TypeLex lex, int add) {
     if (t == TMul) {
         magazin[z++] = netermExpr41 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_MUL;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TMul;
     } else if (t == TDiv) {
         magazin[z++] = netermExpr41 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_DIV;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TDiv;
     } else if (t == TMod) {
         magazin[z++] = netermExpr41 + add;
         // delta match
+        magazin[z++] = DELTA_GEN_MOD;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TMod;
@@ -544,16 +749,20 @@ bool LL1::expression41(int t, TypeLex lex, int add) {
 }
 
 void LL1::epsilon() {
-    //z--;
+    //z--; todo удалить
 }
 
 bool LL1::expression51(int t, TypeLex lex) {
     if (t == TAddSelf) {
         // delta checkUn
+        magazin[z++] = DELTA_GEN_PLUS;
+        magazin[z++] = GEN_PUSH_ONE;
         magazin[z++] = DEL_CheckUnar;
         magazin[z++] = TAddSelf;
     } else if (t == TSubSelf) {
         // delta match
+        magazin[z++] = DELTA_GEN_MINUS;
+        magazin[z++] = GEN_PUSH_ONE;
         magazin[z++] = DEL_CheckUnar;
         magazin[z++] = TSubSelf;
     } else if (t == TRightRoundSkob || t == TTZpt || t == TZpt)
@@ -564,18 +773,44 @@ bool LL1::expression51(int t, TypeLex lex) {
     return true;
 }
 
+void LL1::generateArithmeticTriad(int operation) {
+    Operand *operand2 = getOperand();
+    Operand *operand1 = getOperand();
+    triads.push_back(new Triad(operation, operand1, operand2));
+    operands.push_back(new Operand(getLastTriadAddr()));
+}
+
+int LL1::getReturnAddress() {
+    return getTopValue(returnAddress, "returnAddress");
+}
+
+Operand *LL1::getOperand() {
+    return getTopValue(operands, "operands");
+}
+
+int LL1::getTypeDataOperand(Operand *operand) {
+    if (operand == nullptr || operand->type == EMPTY)
+        return TDataUndefined;
+    if (operand->type == NODE)
+        return operand->value.node->typeData;
+    return getTypeDataTriad(triads[operand->value.address]);
+}
+
+template<typename T>
+T LL1::getTopValue(vector<T> &st, const string &name) {
+    if (st.empty())
+        throw EmptyCollectionError("operands");
+    auto res = st.back();
+    st.pop_back();
+    return res;
+}
 
 // обновляем текущий тип, идентификатор и константу, если надо
 void LL1::getCurrents(int t, TypeLex lex) {
 
-    if (t == TConst10 || t == TConst16) {
-        strcpy(currentConst, lex);
-        currentTypeConst = t;
+    if (t == TConst10 || t == TConst16 || t == TIdent) {
+        strcpy(currentIdentOrConst, lex);
     }
-    if (t == TIdent) {
-        strcpy(currentIdent, lex);
-    }
-
 }
 
 bool LL1::isTerminal(int t) {
@@ -765,4 +1000,212 @@ string LL1::codeToString(int code) {
     }
 
     return str;
+}
+
+void LL1::outTriads() {
+    cout << "Триады: " << endl;
+    for (int i = 0; i < triads.size(); i++) {
+        cout << i << ") ";
+        outOneTriad(triads[i]);
+        cout << endl;
+    }
+}
+
+void LL1::outOneTriad(Triad *triad) {
+    cout << codeOperationToString(triad->getOperation()) << " ";
+    outOneOperand(triad->getOperand1());
+    cout << " ";
+    outOneOperand(triad->getOperand2());
+}
+
+string LL1::codeOperationToString(int code) {
+    string str;
+
+    switch (code) {
+        case TRI_MUL:
+            str = "*";
+            break;
+        case TRI_DIV:
+            str = "/";
+            break;
+        case TRI_MOD:
+            str = "%";
+            break;
+        case TRI_PLUS:
+            str = "+";
+            break;
+        case TRI_MINUS:
+            str = "-";
+            break;
+        case TRI_ASSIGNMENT:
+            str = "=";
+            break;
+        case TRI_CMP:
+            str = "cmp";
+            break;
+        case TRI_CALL:
+            str = "call";
+            break;
+        case TRI_JNE:
+            str = "jne";
+            break;
+        case TRI_PROC:
+            str = "proc";
+            break;
+        case TRI_ENDP:
+            str = "endp";
+            break;
+        case TRI_JMP:
+            str = "jmp";
+            break;
+        case TRI_RET:
+            str = "ret";
+            break;
+        case TRI_MOV:
+            str = "mov";
+            break;
+        case TRI_SHORT_INT:
+            str = "sh->i";
+            break;
+        case TRI_SHORT_LONG:
+            str = "sh->l";
+            break;
+        case TRI_SHORT_LONGLONG:
+            str = "sh->ll";
+            break;
+        case TRI_INT_LONG:
+            str = "i->l";
+            break;
+        case TRI_INT_LONGLONG:
+            str = "i->ll";
+            break;
+        case TRI_LONG_LONGLONG:
+            str = "l->ll";
+            break;
+        case TRI_LONGLONG_LONG :
+            str = "ll->l";
+            break;
+        case TRI_LONGLONG_INT :
+            str = "ll->i";
+            break;
+        case TRI_LONGLONG_SHORT:
+            str = "ll->sh";
+            break;
+        case TRI_LONG_INT :
+            str = "l->i";
+            break;
+        case TRI_LONG_SHORT:
+            str = "l->sh";
+            break;
+        case TRI_INT_SHORT :
+            str = "i->sh";
+            break;
+        case TRI_NOP:
+            str = "nop";
+            break;
+        case TRI_IF:
+            str = "if";
+            break;
+        case TRI_UNIQUE_LABEL:
+            str = getUniqueLabel(4) + ':';
+            break;
+        default:
+            throw invalid_argument("invalid operation code: " + to_string(code));
+    }
+
+    return str;
+}
+
+void LL1::outOneOperand(Operand *operand) {
+    if (operand == nullptr || operand->type == EMPTY)
+        cout << "-";
+    else if (operand->type == ADDRESS)
+        cout << "(" << operand->value.address << ")";
+    else if (operand->type == NODE)
+        cout << operand->value.node->id;
+}
+
+void LL1::outOperands() {
+    cout << "Операнды: ";
+    for (int i = 0; i < operands.size(); i++) {
+        outOneOperand(operands[i]);
+        cout << " ";
+    }
+    cout << "\n";
+}
+
+
+Triad *LL1::getCastTypeTriad(int castableType, int typeToCast, Operand *operandForCast) {
+    if (typeToCast == TDataUndefined) {
+        sc->printError("Попытка привести к типу TDataUndefined");
+    }
+    if (castableType == TDataShort) {
+        switch (typeToCast) {
+            case TDataInt:
+                return new Triad(TRI_SHORT_INT, operandForCast, nullptr);
+            case TDataLong:
+                return new Triad(TRI_SHORT_LONG, operandForCast, nullptr);
+            case TDataLongLong:
+                return new Triad(TRI_SHORT_LONGLONG, operandForCast, nullptr);
+        }
+    }
+    if (castableType == TDataInt) {
+        switch (typeToCast) {
+            case TDataShort:
+                return new Triad(TRI_INT_SHORT, operandForCast, nullptr);
+            case TDataLong:
+                return new Triad(TRI_INT_LONG, operandForCast, nullptr);
+            case TDataLongLong:
+                return new Triad(TRI_INT_LONGLONG, operandForCast, nullptr);
+        }
+    }
+    if (castableType == TDataLong) {
+        switch (typeToCast) {
+            case TDataShort:
+                return new Triad(TRI_LONG_SHORT, operandForCast, nullptr);
+            case TDataInt:
+                return new Triad(TRI_LONG_INT, operandForCast, nullptr);
+            case TDataLongLong:
+                return new Triad(TRI_LONG_LONGLONG, operandForCast, nullptr);
+        }
+    }
+    if (castableType == TDataLongLong) {
+        switch (typeToCast) {
+            case TDataShort:
+                return new Triad(TRI_LONGLONG_SHORT, operandForCast, nullptr);
+            case TDataInt:
+                return new Triad(TRI_LONGLONG_INT, operandForCast, nullptr);
+            case TDataLong:
+                return new Triad(TRI_LONGLONG_LONG, operandForCast, nullptr);
+        }
+    }
+    sc->printError("Попытка привести TDataUndefined к другому типу");
+    return TDataUndefined;
+}
+
+int LL1::getTypeDataTriad(Triad *&pTriad) {
+    int type1 = getTypeDataOperand(pTriad->getOperand1());
+    int type2 = getTypeDataOperand(pTriad->getOperand2());
+    return type2 > type1 ? type2 : type1;
+}
+
+int LL1::getLastTriadAddr() const {
+    return triads.size() - 1;
+}
+
+string LL1::getUniqueLabel(int len) {
+    {
+        std::string tmp_s;
+        static const char alphanum[] =
+                "0123456789"
+                "abcdefghijklmnopqrstuvwxyz";
+
+        tmp_s.reserve(len);
+
+        for (int i = 0; i < len; ++i)
+            tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+
+
+        return tmp_s;
+    }
 }

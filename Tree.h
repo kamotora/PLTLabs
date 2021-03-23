@@ -3,75 +3,8 @@
 
 #include "defs.h"
 #include "Scanner.h"
+#include "Node.h"
 #include <memory>
-
-union DataValue {
-    short dataAsShort;
-    int dataAsInt;
-    long dataAsLong;
-    long long dataAsLongLong;
-};
-
-struct Position {
-    int uk;
-    int line;
-    int pos;
-
-    Position() {}
-
-    Position(int _uk, int _line, int _pos) {
-        uk = _uk;
-        line = _line;
-        pos = _pos;
-    }
-
-    void getValues(int &_uk, int &_line, int &_pos) {
-        _uk = uk;
-        _line = line;
-        _pos = pos;
-    }
-};
-
-struct Node {
-
-    // пустой, переменная, функция
-    int typeNode;
-    TypeLex id;
-    // тип (int,short, long, long long)
-    int typeData;
-    DataValue dataValue; // значение
-    Position funcPosition;
-    bool init;
-
-    Node() {
-        typeNode = TNodeEmpty;
-        typeData = TDataUndefined;
-        init = false;
-        strcpy(id, "###");
-    }
-
-    ~Node() {
-    }
-
-    Node(int _typeNode) {
-        typeNode = _typeNode;
-        typeData = TDataUndefined;
-        init = false;
-        strcpy(id, "###");
-    }
-
-    Node(int _typeNode, TypeLex _id, int _typeData) {
-        typeNode = _typeNode;
-        typeData = _typeData;
-        init = false;
-        memcpy(id, _id, strlen(_id) + 1);
-    }
-
-    Node(int typeNode, const char *_id, int typeData, const Position &funcPosition) :
-            typeNode(typeNode), typeData(typeData), funcPosition(funcPosition) {
-        memcpy(id, _id, strlen(_id) + 1);
-    }
-};
 
 class Tree {
 private:
