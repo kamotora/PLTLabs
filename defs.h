@@ -194,32 +194,18 @@ typedef char TypeLex[MAX_LEX];
 #define DELTA_GEN_MOV -422
 
 #define GEN_PUSH -300
-#define GEN_StartFunc -310
-#define GEN_EndFunc -311
-#define GEN_Assign -312
-#define GEN_Expr -313
-#define GEN_If -314
-#define GEN_GoToIf -315
-#define GEN_SET_ADDR -316
-#define GEN_FormIf -317
-#define GEN_CallFunc -318
-#define GEN_Return -320
-#define GEN_PrefExpr -321
-#define GEN_PostExpr -322
-#define GEN_GoToStep -323
-#define GEN_PrefMinus -325
+#define GEN_IF -314
+#define GEN_GOTO_IF -315
+#define GEN_SET_LOOP_ADDR -316
+#define GEN_FORM_IF -317
+#define GEN_GOTO_STEP -323
+#define GEN_FOR -330
 // дельты записи в стек операндов (R)
-#define DELTA_WRITE_CONST -500
 #define GEN_PUSH_MINUS_ONE -510
-#define DELTA_WRITE_TOP -520
-#define DELTA_WRITE_ONE -530
-#define GEN_PUSH_ZERO -540
-#define DELTA_WRITE_CURRENT_ID -550
-#define DELTA_WRITE_COUNT_ELEM -560  // для инициализации массива перечислением констант
+#define GEN_PUSH_ONE -520
+#define GEN_PUSH_ZERO -530
 #define DELTA_WRITE_PROLOG -570
 #define DELTA_WRITE_EPILOG -580
-#define DELTA_WRITE_EAX -590
-#define GEN_PUSH_ONE -600
 #define GEN_SET_ADDR_NOP -610
 // ----------------------------------- Операции для триад  -----------------------------------
 #define TRI_PLUS -2000
@@ -229,7 +215,6 @@ typedef char TypeLex[MAX_LEX];
 #define TRI_MOD -2400
 #define TRI_ASSIGNMENT -2500
 #define TRI_CMP -2600
-#define TRI_INDEX -2700
 #define TRI_CALL -2800
 #define TRI_JNE -2900
 #define TRI_PROC -3000

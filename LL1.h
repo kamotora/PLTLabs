@@ -32,10 +32,10 @@ private:
     TypeLex currentIdentOrConst;  // последний идентификатор или константа
 
     vector<Triad *> triads;  //список сгенерированных триад
-    vector<int> writeTriadAddress;  // список адресов триад, которые нужно дописать
+    vector<int> funcTriads;  // список адресов триад - описаний функций
     vector<Operand *> operands;  //стек результатов
-    vector<int> returnAddress;  // стек адресов возврата (для for)
-    vector<int> loopTriads;
+//    vector<int> returnAddress;
+    vector<pair<int, vector<int>>> loopTriads; // стек адресов возврата (триада для for, адреса переходов для данного for)
 
     bool isDelta(int t);
 
@@ -69,8 +69,6 @@ public:
 
     void processingDelta(int delta);
 
-    void outTree();
-
     int subTypesStack();
 
     void pushType(int dataType, int nodeType);
@@ -93,8 +91,6 @@ public:
     void generateArithmeticTriad(int operation);
 
     Operand *getOperand();
-
-    int getReturnAddress();
 
     Triad *getCastTypeTriad(int castableType, int typeToCast, Operand *operandForCast);
 

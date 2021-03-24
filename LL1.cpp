@@ -81,8 +81,8 @@ int LL1::LL_1() {
                             magazin[z++] = netermSostOper;
                             magazin[z++] = TRightRoundSkob;
                             magazin[z++] = TLeftRoundSkob;
-                            magazin[z++] = DEL_SetFunc;
                             magazin[z++] = DELTA_GEN_PROC;
+                            magazin[z++] = DEL_SetFunc;
                             magazin[z++] = TIdent;
                             magazin[z++] = netermType;
                         } else
@@ -190,19 +190,19 @@ int LL1::LL_1() {
                     break;
                 case netermOper:
                     if (t == TFor) {
-                        magazin[z++] = GEN_FormIf;
+                        magazin[z++] = GEN_FORM_IF;
                         magazin[z++] = GEN_SET_ADDR_NOP; // end
-                        magazin[z++] = GEN_GoToStep; // goto step
+                        magazin[z++] = GEN_GOTO_STEP; // goto step
                         magazin[z++] = netermOper;
-                        magazin[z++] = GEN_SET_ADDR; // body
+                        magazin[z++] = GEN_SET_LOOP_ADDR; // body
                         magazin[z++] = TRightRoundSkob;
-                        magazin[z++] = GEN_GoToIf;
+                        magazin[z++] = GEN_GOTO_IF;
                         magazin[z++] = netermExpr1;
-                        magazin[z++] = GEN_SET_ADDR; // step
+                        magazin[z++] = GEN_SET_LOOP_ADDR; // step
                         magazin[z++] = TTZpt;
-                        magazin[z++] = GEN_If;
+                        magazin[z++] = GEN_IF;
                         magazin[z++] = netermExpr1;
-                        magazin[z++] = GEN_SET_ADDR; // conditional
+                        magazin[z++] = GEN_SET_LOOP_ADDR; // conditional
                         magazin[z++] = TTZpt;
                         magazin[z++] = netermAssign;
                         magazin[z++] = GEN_PUSH;
@@ -210,10 +210,10 @@ int LL1::LL_1() {
                         magazin[z++] = DEL_FindVar;
                         magazin[z++] = TIdent;
                         magazin[z++] = TLeftRoundSkob;
+                        magazin[z++] = GEN_FOR;
                         magazin[z++] = TFor;
                     } else if (t == TReturn) {
                         magazin[z++] = TTZpt;
-                        magazin[z++] = GEN_Return;
                         // delta returnCheck
                         magazin[z++] = DEL_ReturnCheck;
                         magazin[z++] = netermExpr1;
@@ -270,18 +270,16 @@ int LL1::LL_1() {
                     break;
                 case netermExpr5:
                     if (t == TAddSelf) {
-                        magazin[z++] = GEN_PrefExpr;
-                        // delta CheckUnar
                         magazin[z++] = DELTA_GEN_PLUS;
                         magazin[z++] = GEN_PUSH_ONE;
+                        // delta CheckUnar
                         magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TAddSelf;
                     } else if (t == TSubSelf) {
-                        magazin[z++] = GEN_PrefExpr;
-                        // delta CheckUnar
                         magazin[z++] = DELTA_GEN_MINUS;
                         magazin[z++] = GEN_PUSH_ONE;
+                        // delta CheckUnar
                         magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TSubSelf;
@@ -326,7 +324,7 @@ int LL1::LL_1() {
                     break;
                 case netermFuncCallOrVar:
                     if (t == TLeftRoundSkob) {
-                        magazin[z++] = GEN_PUSH;
+//                        magazin[z++] = GEN_PUSH;
                         // delta PushType && CallFunc
                         magazin[z++] = DEL_GEN_CALL;
                         magazin[z++] = DEL_CallFunc;
@@ -453,19 +451,32 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_ReturnCheck: {
-            Node *cur;
-            int i = tpz - 1;
-            do {
-                cur = treePointers[i--]->getNode();
-            } while (cur->typeNode != TNodeFunction && i >= 0);
-            if (cur->typeNode != TNodeFunction)
+            //todo вынести общий код, а то не красиво как-то
+
+
+            auto funcTriad = triads[funcTriads.back()];
+            if (funcTriad->getOperand1()->type != NODE ||
+                funcTriad->getOperand1()->value.node->typeNode != TNodeFunction)
                 sc->printError("Не найдено функции в DEL_ReturnCheck");
-            int func, expression;
-            func = cur->typeData;
-            expression = subTypesStack();
-            if (expression > func) {
-                sc->printWarningTypes(expression, func, WDifferentTypesFunc);
+            Node *cur = funcTriad->getOperand1()->value.node;
+//            int i = tpz - 1;
+//            do {
+//                cur = treePointers[i--]->getNode();
+//            } while (cur->typeNode != TNodeFunction && i >= 0);
+            // Проверка возвращаемого типа и типа выражения в return;
+            auto returnExpressionOperand = operands[operands.size() - 1];
+            int funcTypeData, expressionTypeData;
+            funcTypeData = cur->typeData;
+            expressionTypeData = getTypeDataOperand(returnExpressionOperand);
+            if (expressionTypeData != funcTypeData) {
+                triads.push_back(getCastTypeTriad(expressionTypeData, funcTypeData, returnExpressionOperand));
+                if (expressionTypeData > funcTypeData)
+                    sc->printWarningTypes(expressionTypeData, funcTypeData, WDifferentTypesFunc);
             }
+
+            triads.push_back(new Triad(TRI_MOV, getOperand(), new Operand("eax")));
+            operands.push_back(new Operand(getLastTriadAddr()));
+            triads.push_back(new Triad(TRI_RET));
             break;
         }
 
@@ -519,66 +530,50 @@ void LL1::processingGenFunc(int t) {
         case GEN_PUSH_ZERO:
             operands.push_back(new Operand(new Node(TNodeConst, "0", TDataShort)));
             break;
-        case GEN_StartFunc:
-            break;
-        case GEN_EndFunc:
-            break;
         case DELTA_GEN_ASSIGNMENT:
             generateArithmeticTriad(TRI_ASSIGNMENT);
             break;
-        case GEN_Expr:
-            break;
-        case GEN_FormIf: {
-            int triad = getTopValue(loopTriads, "loopTriads");
+        case GEN_FORM_IF: {
+            auto loopTriad = getTopValue(loopTriads, "loopTriads");
             // выход из цикла
-            Operand *operand2 = new Operand(getReturnAddress());
-            triads[triad]->setOperand2(operand2);
+            Operand *operand2 = new Operand(getTopValue(loopTriad.second, "loopReturnAddresses"));
+            triads[loopTriad.first]->setOperand2(operand2);
             // переход к телу цикла
-            Operand *operand1 = new Operand(getReturnAddress());
-            triads[triad]->setOperand1(operand1);
+            Operand *operand1 = new Operand(getTopValue(loopTriad.second, "loopReturnAddresses"));
+            triads[loopTriad.first]->setOperand1(operand1);
             break;
         }
-        case GEN_GoToIf: {
-            auto condition = returnAddress[returnAddress.size() - 2];
+        case GEN_GOTO_IF: {
+            auto returnAddresses = loopTriads.back().second;
+            auto condition = returnAddresses[returnAddresses.size() - 2];
             triads.push_back(new Triad(TRI_JMP, new Operand(condition), nullptr));
             break;
         }
-        case GEN_GoToStep: {
-            auto body = getReturnAddress();
-            triads.push_back(new Triad(TRI_JMP, new Operand(getReturnAddress()), nullptr));
-            returnAddress.push_back(body);
+        case GEN_GOTO_STEP: {
+            auto returnAddresses = loopTriads.back().second;
+            auto step = returnAddresses[returnAddresses.size() - 2];
+            triads.push_back(new Triad(TRI_JMP, new Operand(step), nullptr));
             break;
         }
-        case GEN_SET_ADDR: {
+        case GEN_SET_LOOP_ADDR: {
             triads.push_back(new Triad(TRI_UNIQUE_LABEL));
-            returnAddress.push_back(getLastTriadAddr());
+            loopTriads.back().second.push_back(getLastTriadAddr());
+//            returnAddress.push_back(getLastTriadAddr());
             break;
         }
         case GEN_SET_ADDR_NOP: {
             triads.push_back(new Triad(TRI_NOP));
-            returnAddress.push_back(getLastTriadAddr());
+            loopTriads.back().second.push_back(getLastTriadAddr());
             break;
         }
-        case GEN_If: {
+        case GEN_FOR: {
+            loopTriads.push_back(make_pair(0, vector<int>()));
+            break;
+        }
+        case GEN_IF: {
             // goto body (true) or end (false), адреса заполним позже
             triads.push_back(new Triad(TRI_IF, nullptr, nullptr));
-            loopTriads.push_back(getLastTriadAddr());
-            break;
-        }
-        case GEN_Return: {
-            triads.push_back(new Triad(TRI_MOV, getOperand(), new Operand("eax")));
-            operands.push_back(new Operand(getLastTriadAddr()));
-            writeTriadAddress.push_back(getLastTriadAddr());
-            triads.push_back(new Triad(TRI_RET));
-            break;
-        }
-        case GEN_PrefExpr:
-            break;
-        case GEN_PostExpr:
-            break;
-        case DELTA_GEN_JNE: {
-            triads.push_back(new Triad(TRI_JNE, new Operand(getReturnAddress()), nullptr));
-            operands.push_back(new Operand(getLastTriadAddr()));
+            loopTriads.back().first = getLastTriadAddr();
             break;
         }
         case DELTA_GEN_CMP: {
@@ -626,11 +621,13 @@ void LL1::processingGenFunc(int t) {
             break;
         }
         case DELTA_GEN_PROC: {
-            triads.push_back(new Triad(TRI_PROC, new Operand(currentIdentOrConst), nullptr));
+            triads.push_back(new Triad(TRI_PROC, new Operand(treePointers[tpz - 1]->getNode()), nullptr));
+            funcTriads.push_back(getLastTriadAddr());
             break;
         }
         case DELTA_GEN_ENDP: {
-            triads.push_back(new Triad(TRI_ENDP));
+            auto func = getTopValue(funcTriads, "funcTriads");
+            triads.push_back(new Triad(TRI_ENDP, new Operand(triads[func]->getOperand1()->value.node), nullptr));
             break;
         }
         default:
@@ -778,10 +775,6 @@ void LL1::generateArithmeticTriad(int operation) {
     Operand *operand1 = getOperand();
     triads.push_back(new Triad(operation, operand1, operand2));
     operands.push_back(new Operand(getLastTriadAddr()));
-}
-
-int LL1::getReturnAddress() {
-    return getTopValue(returnAddress, "returnAddress");
 }
 
 Operand *LL1::getOperand() {
