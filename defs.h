@@ -178,20 +178,30 @@ typedef char TypeLex[MAX_LEX];
 #define DEL_CallFunc -190
 
 // ----------------------------------- Подпрограммы генерации  -----------------------------------
-#define DELTA_GEN_MUL -400
-#define DELTA_GEN_DIV -410
-#define DELTA_GEN_MOD -411
-#define DELTA_GEN_PLUS -412
-#define DELTA_GEN_MINUS -413
-#define DELTA_GEN_ASSIGNMENT -414
-#define DELTA_GEN_CMP -415
-#define DELTA_GEN_INDEX -416
-#define DEL_GEN_CALL -417
-#define DELTA_GEN_JNE -418
-#define DELTA_GEN_PROC -419
-#define DELTA_GEN_ENDP -420
-#define DELTA_GEN_JMP -421
-#define DELTA_GEN_MOV -422
+//==
+#define GEN_EQ -1400
+//!=
+#define GEN_NEQ -1500
+//>
+#define GEN_GT -1600
+//>=
+#define GEN_GE -1700
+//<
+#define GEN_LT -1800
+//<=
+#define GEN_LE -1900
+#define GEN_MUL -400
+#define GEN_DIV -410
+#define GEN_MOD -411
+#define GEN_PLUS -412
+#define GEN_MINUS -413
+#define GEN_ASSIGNMENT -414
+#define GEN_CMP -415
+#define GEN_CALL -417
+#define GEN_PROC -419
+#define GEN_ENDP -420
+#define GEN_JMP -421
+#define GEN_MOV -422
 
 #define GEN_PUSH -300
 #define GEN_IF -314
@@ -204,10 +214,22 @@ typedef char TypeLex[MAX_LEX];
 #define GEN_PUSH_MINUS_ONE -510
 #define GEN_PUSH_ONE -520
 #define GEN_PUSH_ZERO -530
-#define DELTA_WRITE_PROLOG -570
-#define DELTA_WRITE_EPILOG -580
+#define GEN_PUSH_PROLOG -570
+#define GEN_PUSH_EPILOG -580
 #define GEN_SET_ADDR_NOP -610
 // ----------------------------------- Операции для триад  -----------------------------------
+//==
+#define TRI_EQ -1400
+//!=
+#define TRI_NEQ -1500
+//>
+#define TRI_GT -1600
+//>=
+#define TRI_GE -1700
+//<
+#define TRI_LT -1800
+//<=
+#define TRI_LE -1900
 #define TRI_PLUS -2000
 #define TRI_MINUS -2100
 #define TRI_MUL -2200
@@ -216,7 +238,6 @@ typedef char TypeLex[MAX_LEX];
 #define TRI_ASSIGNMENT -2500
 #define TRI_CMP -2600
 #define TRI_CALL -2800
-#define TRI_JNE -2900
 #define TRI_PROC -3000
 #define TRI_ENDP -3100
 #define TRI_JMP -3200

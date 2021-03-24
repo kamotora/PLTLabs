@@ -75,13 +75,13 @@ int LL1::LL_1() {
                                 break;
                             }
                         if (isFunc) {
-                            magazin[z++] = DELTA_GEN_ENDP;
+                            magazin[z++] = GEN_ENDP;
                             magazin[z++] = DEL_EndDecl;
                             magazin[z++] = DEL_EndFunc;
                             magazin[z++] = netermSostOper;
                             magazin[z++] = TRightRoundSkob;
                             magazin[z++] = TLeftRoundSkob;
-                            magazin[z++] = DELTA_GEN_PROC;
+                            magazin[z++] = GEN_PROC;
                             magazin[z++] = DEL_SetFunc;
                             magazin[z++] = TIdent;
                             magazin[z++] = netermType;
@@ -152,7 +152,7 @@ int LL1::LL_1() {
                     break;
                 case netermAssign:
                     if (t == TSave) {
-                        magazin[z++] = DELTA_GEN_ASSIGNMENT;
+                        magazin[z++] = GEN_ASSIGNMENT;
                         magazin[z++] = DEL_MatchLeft;
                         magazin[z++] = netermExpr1;
                         magazin[z++] = TSave;
@@ -270,14 +270,14 @@ int LL1::LL_1() {
                     break;
                 case netermExpr5:
                     if (t == TAddSelf) {
-                        magazin[z++] = DELTA_GEN_PLUS;
+                        magazin[z++] = GEN_PLUS;
                         magazin[z++] = GEN_PUSH_ONE;
                         // delta CheckUnar
                         magazin[z++] = DEL_CheckUnar;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = TAddSelf;
                     } else if (t == TSubSelf) {
-                        magazin[z++] = DELTA_GEN_MINUS;
+                        magazin[z++] = GEN_MINUS;
                         magazin[z++] = GEN_PUSH_ONE;
                         // delta CheckUnar
                         magazin[z++] = DEL_CheckUnar;
@@ -288,7 +288,7 @@ int LL1::LL_1() {
                         magazin[z++] = TPlus;
                     } else if (t == TMinus) {
                         // -5 = -1 * 5
-                        magazin[z++] = DELTA_GEN_MUL;
+                        magazin[z++] = GEN_MUL;
                         magazin[z++] = netermExpr6;
                         magazin[z++] = GEN_PUSH_MINUS_ONE;
                         magazin[z++] = TMinus;
@@ -326,7 +326,7 @@ int LL1::LL_1() {
                     if (t == TLeftRoundSkob) {
 //                        magazin[z++] = GEN_PUSH;
                         // delta PushType && CallFunc
-                        magazin[z++] = DEL_GEN_CALL;
+                        magazin[z++] = GEN_CALL;
                         magazin[z++] = DEL_CallFunc;
                         magazin[z++] = TRightRoundSkob;
                         magazin[z++] = TLeftRoundSkob;
@@ -530,8 +530,26 @@ void LL1::processingGenFunc(int t) {
         case GEN_PUSH_ZERO:
             operands.push_back(new Operand(new Node(TNodeConst, "0", TDataShort)));
             break;
-        case DELTA_GEN_ASSIGNMENT:
+        case GEN_ASSIGNMENT:
             generateArithmeticTriad(TRI_ASSIGNMENT);
+            break;
+        case GEN_EQ:
+            generateArithmeticTriad(TRI_EQ);
+            break;
+        case GEN_NEQ :
+            generateArithmeticTriad(TRI_NEQ);
+            break;
+        case GEN_GT:
+            generateArithmeticTriad(TRI_GT);
+            break;
+        case GEN_GE :
+            generateArithmeticTriad(TRI_GE);
+            break;
+        case GEN_LT:
+            generateArithmeticTriad(TRI_LT);
+            break;
+        case GEN_LE:
+            generateArithmeticTriad(TRI_LE);
             break;
         case GEN_FORM_IF: {
             auto loopTriad = getTopValue(loopTriads, "loopTriads");
@@ -576,56 +594,56 @@ void LL1::processingGenFunc(int t) {
             loopTriads.back().first = getLastTriadAddr();
             break;
         }
-        case DELTA_GEN_CMP: {
+        case GEN_CMP: {
             generateArithmeticTriad(TRI_CMP);
             break;
         }
-        case DELTA_GEN_MUL: {
+        case GEN_MUL: {
             generateArithmeticTriad(TRI_MUL);
             break;
         }
 
-        case DELTA_GEN_DIV: {
+        case GEN_DIV: {
             generateArithmeticTriad(TRI_DIV);
             break;
         }
 
-        case DELTA_GEN_MOD: {
+        case GEN_MOD: {
             generateArithmeticTriad(TRI_MOD);
             break;
         }
 
-        case DELTA_GEN_PLUS: {
+        case GEN_PLUS: {
             generateArithmeticTriad(TRI_PLUS);
             break;
         }
 
-        case DELTA_GEN_MINUS: {
+        case GEN_MINUS: {
             generateArithmeticTriad(TRI_MINUS);
             break;
         }
 
-        case DEL_GEN_CALL: {
+        case GEN_CALL: {
             Operand *operand = getOperand();
             triads.push_back(new Triad(TRI_CALL, operand, nullptr));
             operands.push_back(new Operand(getLastTriadAddr()));
             break;
         }
-        case DELTA_WRITE_PROLOG: {
+        case GEN_PUSH_PROLOG: {
             operands.push_back(new Operand(new Node(prolog)));
             break;
         }
 
-        case DELTA_WRITE_EPILOG: {
+        case GEN_PUSH_EPILOG: {
             operands.push_back(new Operand(new Node(epilog)));
             break;
         }
-        case DELTA_GEN_PROC: {
+        case GEN_PROC: {
             triads.push_back(new Triad(TRI_PROC, new Operand(treePointers[tpz - 1]->getNode()), nullptr));
             funcTriads.push_back(getLastTriadAddr());
             break;
         }
-        case DELTA_GEN_ENDP: {
+        case GEN_ENDP: {
             auto func = getTopValue(funcTriads, "funcTriads");
             triads.push_back(new Triad(TRI_ENDP, new Operand(triads[func]->getOperand1()->value.node), nullptr));
             break;
@@ -639,14 +657,14 @@ bool LL1::expression11(int t, TypeLex lex, int add) {
     if (t == TEQ) {
         magazin[z++] = netermExpr11 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_CMP;
+        magazin[z++] = GEN_EQ;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr2 + add;
         magazin[z++] = TEQ;
     } else if (t == TNEQ) {
         magazin[z++] = netermExpr11 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_CMP;
+        magazin[z++] = GEN_NEQ;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr2 + add;
         magazin[z++] = TNEQ;
@@ -662,28 +680,28 @@ bool LL1::expression21(int t, TypeLex lex, int add) {
     if (t == TGE) {
         magazin[z++] = netermExpr21 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_CMP;
+        magazin[z++] = GEN_GE;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3;
         magazin[z++] = TGE;
     } else if (t == TGT) {
         magazin[z++] = netermExpr21 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_CMP;
+        magazin[z++] = GEN_GT;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TGT;
     } else if (t == TLE) {
         magazin[z++] = netermExpr21 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_CMP;
+        magazin[z++] = GEN_LE;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TLE;
     } else if (t == TLT) {
         magazin[z++] = netermExpr21 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_CMP;
+        magazin[z++] = GEN_LT;
         magazin[z++] = DEL_MatchCompare;
         magazin[z++] = netermExpr3 + add;
         magazin[z++] = TLT;
@@ -698,14 +716,14 @@ bool LL1::expression31(int t, TypeLex lex, int add) {
     if (t == TPlus) {
         magazin[z++] = netermExpr31 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_PLUS;
+        magazin[z++] = GEN_PLUS;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr4 + add;
         magazin[z++] = TPlus;
     } else if (t == TMinus) {
         magazin[z++] = netermExpr31 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_MINUS;
+        magazin[z++] = GEN_MINUS;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr4 + add;
         magazin[z++] = TMinus;
@@ -720,21 +738,21 @@ bool LL1::expression41(int t, TypeLex lex, int add) {
     if (t == TMul) {
         magazin[z++] = netermExpr41 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_MUL;
+        magazin[z++] = GEN_MUL;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TMul;
     } else if (t == TDiv) {
         magazin[z++] = netermExpr41 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_DIV;
+        magazin[z++] = GEN_DIV;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TDiv;
     } else if (t == TMod) {
         magazin[z++] = netermExpr41 + add;
         // delta match
-        magazin[z++] = DELTA_GEN_MOD;
+        magazin[z++] = GEN_MOD;
         magazin[z++] = DEL_Match;
         magazin[z++] = netermExpr5 + add;
         magazin[z++] = TMod;
@@ -752,13 +770,13 @@ void LL1::epsilon() {
 bool LL1::expression51(int t, TypeLex lex) {
     if (t == TAddSelf) {
         // delta checkUn
-        magazin[z++] = DELTA_GEN_PLUS;
+        magazin[z++] = GEN_PLUS;
         magazin[z++] = GEN_PUSH_ONE;
         magazin[z++] = DEL_CheckUnar;
         magazin[z++] = TAddSelf;
     } else if (t == TSubSelf) {
         // delta match
-        magazin[z++] = DELTA_GEN_MINUS;
+        magazin[z++] = GEN_MINUS;
         magazin[z++] = GEN_PUSH_ONE;
         magazin[z++] = DEL_CheckUnar;
         magazin[z++] = TSubSelf;
@@ -959,7 +977,6 @@ string LL1::codeToString(int code) {
         case TNEQ:
             str = "!=";
             break;
-
         case TLeftRoundSkob:
             str = "(";
             break;
@@ -1033,14 +1050,29 @@ string LL1::codeOperationToString(int code) {
         case TRI_ASSIGNMENT:
             str = "=";
             break;
+        case TRI_GT:
+            str = ">";
+            break;
+        case TRI_LT:
+            str = "<";
+            break;
+        case TRI_GE:
+            str = ">=";
+            break;
+        case TRI_LE:
+            str = "<=";
+            break;
+        case TRI_EQ:
+            str = "==";
+            break;
+        case TRI_NEQ:
+            str = "!=";
+            break;
         case TRI_CMP:
             str = "cmp";
             break;
         case TRI_CALL:
             str = "call";
-            break;
-        case TRI_JNE:
-            str = "jne";
             break;
         case TRI_PROC:
             str = "proc";
