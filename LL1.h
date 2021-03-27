@@ -101,6 +101,8 @@ public:
     int getLastTriadAddr() const;
 
     static string getUniqueLabel(int len);
+
+    bool operandNotConst(Operand *operand);
 };
 
 

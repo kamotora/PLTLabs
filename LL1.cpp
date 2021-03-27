@@ -406,13 +406,14 @@ void LL1::processingDelta(int delta) {
 
         case DEL_MatchLeft: {
             //todo вынести общий код, а то не красиво как-то
+            auto assignableOperand = operands[operands.size() - 1];
             int typeDataOperand1 = getTypeDataOperand(operands[operands.size() - 2]);
-            int typeDataOperand2 = getTypeDataOperand(operands[operands.size() - 1]);
-            if (typeDataOperand1 != typeDataOperand2) {
+            int typeDataOperand2 = getTypeDataOperand(assignableOperand);
+            if (typeDataOperand1 != typeDataOperand2 && operandNotConst(assignableOperand)) {
                 if (typeDataOperand1 > typeDataOperand2) {
                     sc->printWarningTypes(typeDataOperand2, typeDataOperand1, WSmallType);
                 }
-                triads.push_back(getCastTypeTriad(typeDataOperand2, typeDataOperand1, operands[operands.size() - 1]));
+                triads.push_back(getCastTypeTriad(typeDataOperand2, typeDataOperand1, assignableOperand));
                 operands.pop_back();
                 operands.push_back(new Operand(getLastTriadAddr()));
             }
@@ -427,14 +428,16 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_Match: {
-            int typeDataOperand1 = getTypeDataOperand(operands[operands.size() - 2]);
-            int typeDataOperand2 = getTypeDataOperand(operands[operands.size() - 1]);
-            if (typeDataOperand1 > typeDataOperand2) {
-                triads.push_back(getCastTypeTriad(typeDataOperand2, typeDataOperand1, operands[operands.size() - 1]));
+            auto operand1 = operands[operands.size() - 2];
+            auto operand2 = operands[operands.size() - 1];
+            int typeDataOperand1 = getTypeDataOperand(operand1);
+            int typeDataOperand2 = getTypeDataOperand(operand2);
+            if (typeDataOperand1 > typeDataOperand2 && operandNotConst(operand2)) {
+                triads.push_back(getCastTypeTriad(typeDataOperand2, typeDataOperand1, operand2));
                 operands.pop_back();
                 operands.push_back(new Operand(getLastTriadAddr()));
-            } else if (typeDataOperand1 < typeDataOperand2) {
-                triads.push_back(getCastTypeTriad(typeDataOperand1, typeDataOperand2, operands[operands.size() - 2]));
+            } else if (typeDataOperand1 < typeDataOperand2 && operandNotConst(operand1)) {
+                triads.push_back(getCastTypeTriad(typeDataOperand1, typeDataOperand2, operand1));
                 operands.pop_back();
                 operands.push_back(new Operand(getLastTriadAddr()));
             }
@@ -468,13 +471,13 @@ void LL1::processingDelta(int delta) {
             int funcTypeData, expressionTypeData;
             funcTypeData = cur->typeData;
             expressionTypeData = getTypeDataOperand(returnExpressionOperand);
-            if (expressionTypeData != funcTypeData) {
+            if (expressionTypeData != funcTypeData && operandNotConst(returnExpressionOperand)) {
                 triads.push_back(getCastTypeTriad(expressionTypeData, funcTypeData, returnExpressionOperand));
                 if (expressionTypeData > funcTypeData)
                     sc->printWarningTypes(expressionTypeData, funcTypeData, WDifferentTypesFunc);
             }
 
-            triads.push_back(new Triad(TRI_MOV, getOperand(), new Operand("eax")));
+            triads.push_back(new Triad(TRI_MOV, new Operand("eax"), getOperand()));
             operands.push_back(new Operand(getLastTriadAddr()));
             triads.push_back(new Triad(TRI_RET));
             break;
@@ -498,6 +501,10 @@ void LL1::processingDelta(int delta) {
         }
     }
 }
+
+bool LL1::operandNotConst(Operand *operand) {
+    return operand->type != NODE || operand->value.node->typeNode != TNodeConst;
+};
 
 void LL1::pushType(int dataType, int nodeType) { types.push_back(make_pair(dataType, nodeType)); }
 
