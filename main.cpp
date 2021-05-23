@@ -20,7 +20,12 @@ int main(int argc, char *argv[]) {
         sc = new Scanner(argv[1]);
     LL1 *ll1 = new LL1(sc);
     ll1->LL_1();
+//    ll1->outTree();
 //    ll1->outOperands();
+    cout << "До оптимизации" << endl;
+    ll1->outTriads();
+    ll1->optimize();
+    cout << "После оптимизации" << endl;
     ll1->outTriads();
     int type;
     TypeLex lex;

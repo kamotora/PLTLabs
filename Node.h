@@ -38,7 +38,7 @@
 
 struct Node {
 
-    // пустой, переменная, функция
+    // пустой, переменная, функция, константа
     int typeNode;
     TypeLex id;
     // тип (int,short, long, long long)

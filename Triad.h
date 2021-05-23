@@ -8,6 +8,7 @@
 #include "Node.h"
 #include "defs.h"
 #include "exception/InvalidGenFuncError.h"
+#include <list>
 
 using namespace std;
 enum OperandType {
@@ -26,6 +27,9 @@ public:
     Operand(int triadNum);  //операнд - ссылка на триаду
     Operand(Node *operand); //непосредственный операнд
     Operand(TypeLex operand); //непосредственный операнд
+    bool equals(Operand *other);
+
+    bool anyEquals(const std::list<Operand *> &operands);
 };
 
 class Triad {
@@ -36,15 +40,17 @@ private:
 public:
     Triad(int operation, Operand *op1, Operand *op2);
 
+    ~Triad();
+
     int getOperation() const;
 
     Operand *getOperand1() const;
 
     Operand *getOperand2() const;
 
-    void setOperand1(Operand *operand1);
+    void setOperand1(Operand *pOperand);
 
-    void setOperand2(Operand *operand2);
+    void setOperand2(Operand *pOperand);
 
     Triad(int operation);
 };

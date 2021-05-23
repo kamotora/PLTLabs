@@ -1,6 +1,4 @@
 #include "LL1.h"
-#include "Node.h"
-#include "exception/EmptyCollectionError.h"
 
 LL1::LL1(Scanner *s) {
     sc = s;
@@ -340,10 +338,7 @@ int LL1::LL_1() {
             z--;
         }
     }
-    cout << "// !----- Вывод дерева ----- //\n";
-    root->printTree();
-    cout << "// !----- Конец вывода дерева ----- //\n";
-    return 123;
+    return 0;
 }
 
 void LL1::processingDelta(int delta) {
@@ -439,7 +434,9 @@ void LL1::processingDelta(int delta) {
             } else if (typeDataOperand1 < typeDataOperand2 && operandNotConst(operand1)) {
                 triads.push_back(getCastTypeTriad(typeDataOperand1, typeDataOperand2, operand1));
                 operands.pop_back();
+                operands.pop_back();
                 operands.push_back(new Operand(getLastTriadAddr()));
+                operands.push_back(operand2);
             }
             int second = subTypesStack();
             int first = subTypesStack();
@@ -455,8 +452,6 @@ void LL1::processingDelta(int delta) {
 
         case DEL_ReturnCheck: {
             //todo вынести общий код, а то не красиво как-то
-
-
             auto funcTriad = triads[funcTriads.back()];
             if (funcTriad->getOperand1()->type != NODE ||
                 funcTriad->getOperand1()->value.node->typeNode != TNodeFunction)
@@ -491,8 +486,9 @@ void LL1::processingDelta(int delta) {
         }
 
         case DEL_ConstType: {
-            long long constanta = (currentTypeData == TConst10) ? strtoull(currentIdentOrConst, nullptr, 10) : strtoull(
-                    currentIdentOrConst, nullptr, 16);
+            long long constanta = getConstValue(currentTypeData, currentIdentOrConst);
+            /*(currentTypeData == TConst10) ? strtoull(currentIdentOrConst, nullptr, 10) : strtoull(
+            currentIdentOrConst, nullptr, 16);*/
             auto typeConst = sc->getTypeConst(constanta);
             pushType(typeConst, TNodeConst);
             currentTypeNode = TNodeConst;
@@ -502,9 +498,26 @@ void LL1::processingDelta(int delta) {
     }
 }
 
+long long LL1::getConstValue(int typeData, TypeLex id) {
+    return (typeData == TConst10) ? strtoull(id, nullptr, 10) : strtoull(
+            id, nullptr, 16);
+}
+
+long long LL1::getConstValue(Operand *operand) {
+    if (operand->type != NODE || operand->value.node->typeNode != TNodeConst)
+        throw InvalidTypeDataError(operand->value.node->typeNode);
+    auto id = operand->value.node->id;
+    int constType = strchr(id, 'x') != nullptr || strchr(id, 'X') != nullptr ? TConst16 : TConst10;
+    return getConstValue(constType, id);
+}
+
 bool LL1::operandNotConst(Operand *operand) {
-    return operand->type != NODE || operand->value.node->typeNode != TNodeConst;
-};
+    return !isOperandConst(operand);
+}
+
+bool LL1::isOperandConst(Operand *operand) {
+    return operand->type == NODE && operand->value.node->typeNode == TNodeConst;
+}
 
 void LL1::pushType(int dataType, int nodeType) { types.push_back(make_pair(dataType, nodeType)); }
 
@@ -525,7 +538,6 @@ void LL1::pushType(Tree *pTree) {
 void LL1::processingGenFunc(int t) {
     switch (t) {
         case GEN_PUSH:
-            // todo проверить в дебаге
             operands.push_back(new Operand(new Node(currentTypeNode, currentIdentOrConst, currentTypeData)));
             break;
         case GEN_PUSH_ONE:
@@ -1022,6 +1034,8 @@ string LL1::codeToString(int code) {
 void LL1::outTriads() {
     cout << "Триады: " << endl;
     for (int i = 0; i < triads.size(); i++) {
+        if (triads[i] == nullptr)
+            continue;
         cout << i << ") ";
         outOneTriad(triads[i]);
         cout << endl;
@@ -1029,6 +1043,8 @@ void LL1::outTriads() {
 }
 
 void LL1::outOneTriad(Triad *triad) {
+//    if (triad == nullptr)
+//        return;
     cout << codeOperationToString(triad->getOperation()) << " ";
     outOneOperand(triad->getOperand1());
     cout << " ";
@@ -1240,4 +1256,141 @@ string LL1::getUniqueLabel(int len) {
 
         return tmp_s;
     }
+}
+
+
+void LL1::optimize() {
+    for (int i = 0; i < triads.size(); i++) {
+        if (triads[i] == nullptr)
+            continue;
+        if (triads[i]->getOperation() == TRI_ASSIGNMENT && deleteIfNotLinks(i, 0)) {
+            i = 0;
+            continue;
+        }
+    }
+    for (int i = 0; i < triads.size(); i++) {
+        if (simplifyConstantExpressions(i, 0)) {
+            i = 0;
+            continue;
+        }
+    }
+}
+
+int LL1::deleteIfNotLinks(const int i, int count) {
+    if (triads[i] == nullptr)
+        return count;
+    if (!hasOperandLink(triads[i]->getOperand1(), i)) {
+        auto triad = triads[i];
+        count = deleteIfNotLinks(i, triads[i]->getOperand2(), count++);
+        //todo удаление null ссылок
+        triads[i] = nullptr;
+        delete triad;
+    }
+    return count;
+}
+
+int LL1::deleteIfNotLinks(const int i, Operand *oper, int count) {
+    if (oper == nullptr || (isOperandConst(oper)))
+        return count;
+    // Ищем триаду инициализации переменной, повторяем для неё
+    if (oper->type == NODE) {
+        for (int j = 0; j < i; j++) {
+            if (triads[j] == nullptr)
+                continue;
+            if (triads[j]->getOperation() == TRI_ASSIGNMENT && triads[j]->getOperand1()->equals(oper)) {
+                return deleteIfNotLinks(j, ++count);
+            }
+        }
+    } else {
+        if (!hasOperandLink(oper, i)) {
+            int address = oper->value.address;
+            auto triad = triads[address];
+            triads[address] = nullptr;
+            count = deleteIfNotLinks(address, triad->getOperand1(), count);
+            count = deleteIfNotLinks(address, triad->getOperand2(), count);
+            delete triad;
+            return count;
+        }
+    }
+    return count;
+}
+
+bool LL1::hasOperandLink(Operand *oper, int i) {
+    return getOperandLink(oper, i) != -1;
+}
+
+int LL1::getOperandLink(Operand *oper, int i) {
+    for (int j = i + 1; j < triads.size(); j++) {
+        if (triads[j] == nullptr)
+            continue;
+        if (oper->anyEquals({triads[j]->getOperand1(), triads[j]->getOperand2()})) {
+            return j;
+        }
+    }
+    return -1;
+}
+
+int LL1::simplifyConstantExpressions(int i, int count) {
+    if (triads[i] == nullptr)
+        return count;
+    auto operation = triads[i]->getOperation();
+    if (operation > TRI_PLUS || operation < TRI_MOD)
+        return count;
+    if (isOperandConst(triads[i]->getOperand1()) && isOperandConst(triads[i]->getOperand2())) {
+        long long first = getConstValue(triads[i]->getOperand1());
+        long long second = getConstValue(triads[i]->getOperand2());
+        long long result;
+        switch (operation) {
+            case TRI_PLUS:
+                result = first + second;
+                break;
+            case TRI_MINUS:
+                result = first - second;
+                break;
+            case TRI_MOD:
+                result = first % second;
+                break;
+            case TRI_DIV:
+                result = first / second;
+                break;
+            case TRI_MUL:
+                result = first * second;
+                break;
+        }
+        TypeLex id;
+        std::sprintf(id, "%lld", result);
+        auto newOperand = new Operand(new Node(TNodeConst, id, sc->getTypeConst(result)));
+        auto triad = triads[i];
+        Operand triadWithConstants(i);
+        triads[i] = nullptr;
+        for (int j = i + 1; j < triads.size(); j++) {
+            if (triads[j] == nullptr)
+                continue;
+            if (triadWithConstants.anyEquals({triads[j]->getOperand1(), triads[j]->getOperand2()})) {
+                // убираем не нужные кастования констант
+                while (triads[j]->getOperation() <= TRI_SHORT_INT && triads[j]->getOperation() >= TRI_INT_SHORT) {
+                    auto temp = triads[j];
+                    triads[j] = nullptr;
+                    delete temp;
+                    triadWithConstants = Operand(j);
+                    int address = getOperandLink(new Operand(j), j);
+                    if (address == -1)
+                        break;
+                    j = address;
+                }
+                if (triadWithConstants.equals(triads[j]->getOperand1()))
+                    triads[j]->setOperand1(newOperand);
+                else
+                    triads[j]->setOperand2(newOperand);
+                return simplifyConstantExpressions(j, ++count);
+            }
+        }
+    }
+    return count;
+}
+
+void LL1::outTree() {
+    cout << "// !----- Вывод дерева ----- //\n";
+    root->printTree();
+    cout << "// !----- Конец вывода дерева ----- //\n";
 }

@@ -8,6 +8,9 @@
 #include "stack"
 #include "Triad.h"
 #include "vector"
+#include "Node.h"
+#include "exception/EmptyCollectionError.h"
+#include "exception/InvalidTypeDataError.h"
 
 using namespace std;
 
@@ -43,6 +46,20 @@ private:
 
     template<typename T>
     T getTopValue(vector<T> &st, const string &name);
+
+    long long int getConstValue(int typeData, char *id);
+
+    long long int getConstValue(Operand *operand);
+
+    int deleteIfNotLinks(int i, int count);
+
+    int simplifyConstantExpressions(int i, int count);
+
+    int deleteIfNotLinks(int i, Operand *oper, int count);
+
+    int getOperandLink(Operand *oper, int i = -1);
+
+    bool hasOperandLink(Operand *oper, int i = -1);
 
 public:
     LL1(Scanner *s);
@@ -103,6 +120,12 @@ public:
     static string getUniqueLabel(int len);
 
     bool operandNotConst(Operand *operand);
+
+    void optimize();
+
+    bool isOperandConst(Operand *operand);
+
+    void outTree();
 };
 
 
